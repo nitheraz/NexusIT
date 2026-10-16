@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shapes;
+using NexusIT.App.Views;
 
 namespace NexusIT.App;
 
@@ -40,17 +40,17 @@ public partial class MainWindow : Window
     private void NavigationButton_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button button && button.Tag is string page)
-        {
             NavigateTo(page);
-        }
     }
 
     private void NavigateTo(string page)
     {
         CurrentPageTitle.Text = page;
-        CurrentPageSubtitle.Text = PageSubtitles.TryGetValue(page, out string? subtitle)
-            ? subtitle
-            : "IT administration workspace.";
+
+        CurrentPageSubtitle.Text =
+            PageSubtitles.TryGetValue(page, out string? subtitle)
+                ? subtitle
+                : "IT administration workspace.";
 
         foreach (Button button in _navigationButtons)
         {
@@ -60,17 +60,20 @@ public partial class MainWindow : Window
                 StringComparison.OrdinalIgnoreCase);
 
             button.Background = isActive
-                ? new SolidColorBrush(Color.FromRgb(29, 53, 87))
+                ? BrushFrom("#1D3557")
                 : Brushes.Transparent;
 
             button.Foreground = isActive
-                ? new SolidColorBrush(Color.FromRgb(147, 197, 253))
-                : new SolidColorBrush(Color.FromRgb(209, 213, 219));
+                ? BrushFrom("#93C5FD")
+                : BrushFrom("#D1D5DB");
         }
 
-        MainContent.Content = page == "Dashboard"
-            ? CreateDashboard()
-            : CreatePlaceholderPage(page);
+        MainContent.Content = page switch
+        {
+            "Dashboard" => CreateDashboard(),
+            "Chromebooks" => new ChromebookManagementView(),
+            _ => CreatePlaceholderPage(page)
+        };
 
         StatusText.Text = $"Current workspace: {page}";
     }
@@ -84,9 +87,7 @@ public partial class MainWindow : Window
             DependencyObject child = VisualTreeHelper.GetChild(parent, i);
 
             if (child is Button button && button.Tag is string)
-            {
                 _navigationButtons.Add(button);
-            }
 
             CollectNavigationButtons(child);
         }
@@ -129,40 +130,26 @@ public partial class MainWindow : Window
             Rows = 4
         };
 
-        AddDashboardCard(
-            cards, "Chromebooks", "▣",
-            "Search devices and perform bulk operations.",
-            "#93C5FD");
+        AddDashboardCard(cards, "Chromebooks", "▣",
+            "Search devices and perform bulk operations.", "#93C5FD");
 
-        AddDashboardCard(
-            cards, "Google Groups", "♙",
-            "Manage groups, members and membership roles.",
-            "#86EFAC");
+        AddDashboardCard(cards, "Google Groups", "♙",
+            "Manage groups, members and membership roles.", "#86EFAC");
 
-        AddDashboardCard(
-            cards, "Active Directory", "⌘",
-            "Look up computers, move OUs and manage objects.",
-            "#C4B5FD");
+        AddDashboardCard(cards, "Active Directory", "⌘",
+            "Look up computers, move OUs and manage objects.", "#C4B5FD");
 
-        AddDashboardCard(
-            cards, "MECM / SCCM", "▤",
-            "Manage devices and collection memberships.",
-            "#FCD34D");
+        AddDashboardCard(cards, "MECM / SCCM", "▤",
+            "Manage devices and collection memberships.", "#FCD34D");
 
-        AddDashboardCard(
-            cards, "RDP", "▱",
-            "Open and manage remote desktop connections.",
-            "#67E8F9");
+        AddDashboardCard(cards, "RDP", "▱",
+            "Open and manage remote desktop connections.", "#67E8F9");
 
-        AddDashboardCard(
-            cards, "Admin Tools", "⚒",
-            "Access the existing miscellaneous admin utilities.",
-            "#F9A8D4");
+        AddDashboardCard(cards, "Admin Tools", "⚒",
+            "Access the existing miscellaneous admin utilities.", "#F9A8D4");
 
-        AddDashboardCard(
-            cards, "Settings", "⚙",
-            "Configure integrations and application preferences.",
-            "#D1D5DB");
+        AddDashboardCard(cards, "Settings", "⚙",
+            "Configure integrations and application preferences.", "#D1D5DB");
 
         page.Children.Add(cards);
 
@@ -188,7 +175,7 @@ public partial class MainWindow : Window
                     new TextBlock
                     {
                         Text = "The application shell is ready for development. " +
-                               "Management integrations will be connected in the next stages.",
+                               "Management integrations are being connected in stages.",
                         Foreground = BrushFrom("#9CA3AF"),
                         TextWrapping = TextWrapping.Wrap
                     }
@@ -197,7 +184,6 @@ public partial class MainWindow : Window
         };
 
         page.Children.Add(note);
-
         return page;
     }
 
@@ -324,7 +310,7 @@ public partial class MainWindow : Window
             Margin = new Thickness(0, 0, 0, 20)
         });
 
-        var status = new Border
+        content.Children.Add(new Border
         {
             Background = BrushFrom("#332B1B"),
             BorderBrush = BrushFrom("#66502B"),
@@ -339,9 +325,7 @@ public partial class MainWindow : Window
                 FontSize = 12,
                 FontWeight = FontWeights.SemiBold
             }
-        };
-
-        content.Children.Add(status);
+        });
 
         content.Children.Add(new TextBlock
         {
