@@ -96,7 +96,48 @@ public sealed class ChromebookManagementView : UserControl
             Padding = new Thickness(8, 6, 8, 6),
             Background = BrushFrom("#111827"),
             Foreground = BrushFrom("#F9FAFB"),
-            BorderBrush = BrushFrom("#374151")
+            BorderBrush = BrushFrom("#374151"),
+            Resources = new ResourceDictionary
+            {
+                [SystemColors.WindowBrushKey] = BrushFrom("#111827"),
+                [SystemColors.ControlBrushKey] = BrushFrom("#111827"),
+                [SystemColors.HighlightBrushKey] = BrushFrom("#374151"),
+                [SystemColors.HighlightTextBrushKey] = BrushFrom("#F9FAFB"),
+                [SystemColors.WindowTextBrushKey] = BrushFrom("#F9FAFB")
+            },
+            ItemContainerStyle = new Style(typeof(ComboBoxItem))
+            {
+                Setters =
+                {
+                    new Setter(Control.BackgroundProperty, BrushFrom("#111827")),
+                    new Setter(Control.ForegroundProperty, BrushFrom("#F9FAFB")),
+                    new Setter(Control.BorderBrushProperty, Brushes.Transparent),
+                    new Setter(Control.BorderThicknessProperty, new Thickness(0)),
+                    new Setter(Control.PaddingProperty, new Thickness(8, 6, 8, 6))
+                },
+                Triggers =
+                {
+                    new Trigger
+                    {
+                        Property = ComboBoxItem.IsMouseOverProperty,
+                        Value = true,
+                        Setters =
+                        {
+                            new Setter(Control.BackgroundProperty, BrushFrom("#1F2937"))
+                        }
+                    },
+                    new Trigger
+                    {
+                        Property = ComboBoxItem.IsSelectedProperty,
+                        Value = true,
+                        Setters =
+                        {
+                            new Setter(Control.BackgroundProperty, BrushFrom("#374151")),
+                            new Setter(Control.ForegroundProperty, BrushFrom("#F9FAFB"))
+                        }
+                    }
+                }
+            }
         };
 
         Grid.SetColumn(_searchMode, 0);

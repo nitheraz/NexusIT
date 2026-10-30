@@ -7,6 +7,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using NexusIT.App.Views;
+using NexusIT.App.Views.Rdp;
 
 namespace NexusIT.App;
 
@@ -72,6 +73,7 @@ public partial class MainWindow : Window
         {
             "Dashboard" => CreateDashboard(),
             "Chromebooks" => new ChromebookManagementView(),
+            "RDP" => new RdpManagerView(),
             _ => CreatePlaceholderPage(page)
         };
 
