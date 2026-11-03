@@ -20,14 +20,6 @@
             <Setter Property="CaretBrush" Value="#F9FAFB"/>
         </Style>
 
-        <Style x:Key="FieldCombo" TargetType="ComboBox">
-            <Setter Property="Background" Value="#111827"/>
-            <Setter Property="Foreground" Value="#F9FAFB"/>
-            <Setter Property="BorderBrush" Value="#374151"/>
-            <Setter Property="Padding" Value="8,6"/>
-            <Setter Property="Margin" Value="0,0,0,14"/>
-        </Style>
-
         <Style x:Key="ActionButton" TargetType="Button">
             <Setter Property="Padding" Value="13,8"/>
             <Setter Property="Margin" Value="0,0,8,0"/>
@@ -58,7 +50,7 @@
                            FontWeight="SemiBold"
                            Foreground="#F9FAFB"/>
 
-                <TextBlock Text="Save, organise and launch remote computer sessions."
+                <TextBlock Text="Save and launch remote computer sessions."
                            Foreground="#9CA3AF"
                            FontSize="12"
                            Margin="0,5,0,0"/>
@@ -101,25 +93,13 @@
                                Foreground="#F9FAFB"
                                Margin="0,0,0,14"/>
 
-                    <Grid Grid.Row="1" Margin="0,0,0,14">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="145"/>
-                        </Grid.ColumnDefinitions>
-
-                        <TextBox x:Name="SearchTextBox"
-                                 Style="{StaticResource FieldInput}"
-                                 Margin="0"
-                                 Padding="10,8"
-                                 ToolTip="Search by name, host or group"
-                                 TextChanged="SearchTextBox_TextChanged"/>
-
-                        <ComboBox x:Name="GroupFilterCombo"
-                                  Grid.Column="1"
-                                  Style="{StaticResource FieldCombo}"
-                                  Margin="8,0,0,0"
-                                  SelectionChanged="GroupFilterCombo_SelectionChanged"/>
-                    </Grid>
+                    <TextBox x:Name="SearchTextBox"
+                             Grid.Row="1"
+                             Style="{StaticResource FieldInput}"
+                             Margin="0,0,0,14"
+                             Padding="10,8"
+                             ToolTip="Search by connection name or computer name"
+                             TextChanged="SearchTextBox_TextChanged"/>
 
                     <ListView x:Name="ConnectionsList"
                               Grid.Row="2"
@@ -137,6 +117,7 @@
                                 <Setter Property="BorderBrush" Value="#29364B"/>
                                 <Setter Property="BorderThickness" Value="1"/>
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="ListViewItem">
@@ -148,6 +129,7 @@
                                                     Padding="{TemplateBinding Padding}">
                                                 <ContentPresenter/>
                                             </Border>
+
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsSelected" Value="True">
                                                     <Setter TargetName="ItemBorder"
@@ -157,6 +139,7 @@
                                                             Property="BorderBrush"
                                                             Value="#3B82F6"/>
                                                 </Trigger>
+
                                                 <Trigger Property="IsMouseOver" Value="True">
                                                     <Setter TargetName="ItemBorder"
                                                             Property="Background"
@@ -175,7 +158,6 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="38"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
                                     <Border Width="34"
@@ -203,13 +185,6 @@
                                                    FontSize="11"
                                                    Margin="0,3,0,0"/>
                                     </StackPanel>
-
-                                    <TextBlock Grid.Column="2"
-                                               Text="{Binding Group}"
-                                               Foreground="#93C5FD"
-                                               FontSize="10"
-                                               VerticalAlignment="Center"
-                                               Margin="8,0,0,0"/>
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
@@ -243,41 +218,19 @@
 
                         <TextBlock Text="Connection name"
                                    Style="{StaticResource FieldLabel}"/>
+
                         <TextBox x:Name="NameTextBox"
                                  Style="{StaticResource FieldInput}"/>
 
                         <TextBlock Text="Computer name / IP address"
                                    Style="{StaticResource FieldLabel}"/>
+
                         <TextBox x:Name="HostTextBox"
                                  Style="{StaticResource FieldInput}"/>
 
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="12"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <StackPanel>
-                                <TextBlock Text="RDP port"
-                                           Style="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="PortTextBox"
-                                         Text="3389"
-                                         Style="{StaticResource FieldInput}"/>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="Group"
-                                           Style="{StaticResource FieldLabel}"/>
-                                <ComboBox x:Name="GroupCombo"
-                                          Style="{StaticResource FieldCombo}"
-                                          IsEditable="True"
-                                          Text="General"/>
-                            </StackPanel>
-                        </Grid>
-
                         <TextBlock Text="Username (optional)"
                                    Style="{StaticResource FieldLabel}"/>
+
                         <TextBox x:Name="UsernameTextBox"
                                  Style="{StaticResource FieldInput}"/>
 
@@ -301,30 +254,6 @@
                                   Content="Use all monitors"
                                   Foreground="#D1D5DB"
                                   Margin="0,0,0,14"/>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="12"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <StackPanel>
-                                <TextBlock Text="Width"
-                                           Style="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="WidthTextBox"
-                                         Text="1920"
-                                         Style="{StaticResource FieldInput}"/>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="Height"
-                                           Style="{StaticResource FieldLabel}"/>
-                                <TextBox x:Name="HeightTextBox"
-                                         Text="1080"
-                                         Style="{StaticResource FieldInput}"/>
-                            </StackPanel>
-                        </Grid>
 
                         <TextBlock Text="Passwords are not stored in connection profiles."
                                    Foreground="#9CA3AF"

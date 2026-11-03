@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using NexusIT.App.Models;
@@ -9,6 +10,8 @@ namespace NexusIT.App.Views.Rdp;
 
 public partial class RdpManagerView : UserControl
 {
+    private const int DefaultPort = 3389;
+
     private readonly RdpStorageService _storageService = new();
     private readonly RdpLauncherService _launcherService = new();
 
@@ -16,8 +19,6 @@ public partial class RdpManagerView : UserControl
     private readonly ObservableCollection<RdpConnection> _filteredConnections = [];
 
     private Guid? _editingId;
-    private bool _isLoadingEditor;
-    private bool _isRefreshing;
 
     public RdpManagerView()
     {
@@ -44,7 +45,6 @@ public partial class RdpManagerView : UserControl
             foreach (RdpConnection connection in savedConnections)
                 _connections.Add(connection);
 
-            RefreshGroups();
             ApplyFilters();
 
             EditorStatusText.Text =
@@ -65,12 +65,14 @@ public partial class RdpManagerView : UserControl
         RoutedEventArgs e)
     {
         ConnectionsList.SelectedItem = null;
+        _editingId = null;
+
         ClearEditor();
 
         EditorTitle.Text = "New connection";
-        EditorStatusText.Text = "Enter the connection details and select Save.";
 
-        _editingId = null;
+        EditorStatusText.Text =
+            "Enter the connection details and select Save.";
     }
 
     private void ConnectionsList_SelectionChanged(
@@ -85,51 +87,30 @@ public partial class RdpManagerView : UserControl
 
     private void LoadEditor(RdpConnection connection)
     {
-        _isLoadingEditor = true;
-
         _editingId = connection.Id;
 
         EditorTitle.Text = "Edit connection";
 
         NameTextBox.Text = connection.Name;
         HostTextBox.Text = connection.Host;
-        PortTextBox.Text = connection.Port.ToString();
-
-        GroupCombo.Text = connection.Group;
         UsernameTextBox.Text = connection.Username;
 
         AdminSessionCheckBox.IsChecked = connection.UseAdminSession;
         FullScreenCheckBox.IsChecked = connection.FullScreen;
         AllMonitorsCheckBox.IsChecked = connection.UseAllMonitors;
 
-        WidthTextBox.Text = connection.Width.ToString();
-        HeightTextBox.Text = connection.Height.ToString();
-
-        EditorStatusText.Text =
-            $"Selected: {connection.Name}";
-
-        _isLoadingEditor = false;
+        EditorStatusText.Text = $"Selected: {connection.Name}";
     }
 
     private void ClearEditor()
     {
-        _isLoadingEditor = true;
-
         NameTextBox.Clear();
         HostTextBox.Clear();
-        PortTextBox.Text = "3389";
-
-        GroupCombo.Text = "General";
         UsernameTextBox.Clear();
 
         AdminSessionCheckBox.IsChecked = false;
         FullScreenCheckBox.IsChecked = false;
         AllMonitorsCheckBox.IsChecked = false;
-
-        WidthTextBox.Text = "1920";
-        HeightTextBox.Text = "1080";
-
-        _isLoadingEditor = false;
     }
 
     private async void SaveConnection_Click(
@@ -154,22 +135,19 @@ public partial class RdpManagerView : UserControl
             {
                 existing.Name = connection.Name;
                 existing.Host = connection.Host;
-                existing.Port = connection.Port;
-                existing.Group = connection.Group;
+                existing.Port = DefaultPort;
+                existing.Group = "General";
                 existing.Username = connection.Username;
                 existing.UseAdminSession = connection.UseAdminSession;
                 existing.FullScreen = connection.FullScreen;
                 existing.UseAllMonitors = connection.UseAllMonitors;
-                existing.Width = connection.Width;
-                existing.Height = connection.Height;
             }
 
             await _storageService.SaveAsync(_connections.ToList());
 
-            RefreshGroups();
-            ApplyFilters();
-
             RdpConnection saved = existing ?? connection;
+
+            ApplyFilters();
 
             ConnectionsList.SelectedItem = saved;
             LoadEditor(saved);
@@ -192,7 +170,6 @@ public partial class RdpManagerView : UserControl
 
         string name = NameTextBox.Text.Trim();
         string host = HostTextBox.Text.Trim();
-        string group = GroupCombo.Text.Trim();
 
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -206,42 +183,17 @@ public partial class RdpManagerView : UserControl
             return false;
         }
 
-        if (!int.TryParse(PortTextBox.Text, out int port) ||
-            port is < 1 or > 65535)
-        {
-            ShowValidationError("Enter a valid port between 1 and 65535.");
-            return false;
-        }
-
-        if (!int.TryParse(WidthTextBox.Text, out int width) ||
-            width is < 640 or > 16384)
-        {
-            ShowValidationError("Enter a valid display width.");
-            return false;
-        }
-
-        if (!int.TryParse(HeightTextBox.Text, out int height) ||
-            height is < 480 or > 16384)
-        {
-            ShowValidationError("Enter a valid display height.");
-            return false;
-        }
-
         connection = new RdpConnection
         {
             Id = _editingId ?? Guid.NewGuid(),
             Name = name,
             Host = host,
-            Port = port,
-            Group = string.IsNullOrWhiteSpace(group)
-                ? "General"
-                : group,
+            Port = DefaultPort,
+            Group = "General",
             Username = UsernameTextBox.Text.Trim(),
             UseAdminSession = AdminSessionCheckBox.IsChecked == true,
             FullScreen = FullScreenCheckBox.IsChecked == true,
-            UseAllMonitors = AllMonitorsCheckBox.IsChecked == true,
-            Width = width,
-            Height = height
+            UseAllMonitors = AllMonitorsCheckBox.IsChecked == true
         };
 
         return true;
@@ -296,7 +248,6 @@ public partial class RdpManagerView : UserControl
             ConnectionsList.SelectedItem = null;
 
             ClearEditor();
-            RefreshGroups();
             ApplyFilters();
 
             EditorTitle.Text = "Connection details";
@@ -343,39 +294,6 @@ public partial class RdpManagerView : UserControl
         ApplyFilters();
     }
 
-    private void GroupFilterCombo_SelectionChanged(
-        object sender,
-        SelectionChangedEventArgs e)
-    {
-        if (!_isRefreshing)
-            ApplyFilters();
-    }
-
-    private void RefreshGroups()
-    {
-        _isRefreshing = true;
-
-        string previousSelection =
-            GroupFilterCombo.SelectedItem?.ToString() ?? "All groups";
-
-        List<string> groups = _connections
-            .Select(x => x.Group)
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(x => x)
-            .ToList();
-
-        GroupFilterCombo.ItemsSource =
-            new[] { "All groups" }.Concat(groups).ToList();
-
-        GroupFilterCombo.SelectedItem =
-            GroupFilterCombo.Items.Contains(previousSelection)
-                ? previousSelection
-                : "All groups";
-
-        _isRefreshing = false;
-    }
-
     private void ApplyFilters()
     {
         if (ConnectionsList is null)
@@ -383,34 +301,22 @@ public partial class RdpManagerView : UserControl
 
         string search = SearchTextBox.Text.Trim();
 
-        string selectedGroup =
-            GroupFilterCombo.SelectedItem?.ToString() ?? "All groups";
-
         IEnumerable<RdpConnection> results = _connections;
 
         if (!string.IsNullOrWhiteSpace(search))
         {
             results = results.Where(x =>
-                x.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                x.Host.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                x.Group.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                x.Username.Contains(search, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (selectedGroup != "All groups")
-        {
-            results = results.Where(x =>
-                string.Equals(
-                    x.Group,
-                    selectedGroup,
+                x.Name.Contains(
+                    search,
+                    StringComparison.OrdinalIgnoreCase) ||
+                x.Host.Contains(
+                    search,
                     StringComparison.OrdinalIgnoreCase));
         }
 
         _filteredConnections.Clear();
 
-        foreach (RdpConnection connection in results
-                     .OrderBy(x => x.Group)
-                     .ThenBy(x => x.Name))
+        foreach (RdpConnection connection in results.OrderBy(x => x.Name))
         {
             _filteredConnections.Add(connection);
         }

@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,12 +23,14 @@ public partial class MainWindow : Window
         ["MECM / SCCM"] = "Manage devices and collection memberships.",
         ["RDP"] = "Manage your remote desktop connections.",
         ["Admin Tools"] = "Access your everyday administration utilities.",
+        ["Network & System Tools"] = "Network diagnostics and Windows system utilities.",
         ["Settings"] = "Configure integrations and application preferences."
     };
 
     public MainWindow()
     {
         InitializeComponent();
+        WindowState = WindowState.Maximized;
 
         Loaded += (_, _) =>
         {
@@ -74,6 +75,10 @@ public partial class MainWindow : Window
             "Dashboard" => CreateDashboard(),
             "Chromebooks" => new ChromebookManagementView(),
             "RDP" => new RdpManagerView(),
+            "Admin Tools" => new AdminToolsView(),
+            "Network & System Tools" => new NetworkSystemToolsView(),
+            "Active Directory" => new ActiveDirectoryView(),
+            "MECM / SCCM" => new MecmView(),
             _ => CreatePlaceholderPage(page)
         };
 
