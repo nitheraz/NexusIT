@@ -1,4 +1,5 @@
-﻿using NexusIT.App.Services;
+﻿
+using NexusIT.App.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,40 +14,33 @@ namespace NexusIT.App.Views;
 
 public class MecmView : UserControl, IDisposable
 {
-    // Connection fields
     private readonly ComboBox _profileCombo = new();
     private readonly TextBox _serverBox = new();
     private readonly TextBox _siteCodeBox = new();
     private readonly TextBox _usernameBox = new();
     private readonly PasswordBox _passwordBox = new();
 
-    // Profile buttons
     private readonly Button _addProfileButton = new();
     private readonly Button _updateProfileButton = new();
     private readonly Button _deleteProfileButton = new();
     private readonly Button _defaultProfileButton = new();
 
-    // Connection buttons
     private readonly Button _connectButton = new();
     private readonly Button _disconnectButton = new();
     private readonly Button _connectedDisconnectButton = new();
 
-    // Status
     private readonly TextBlock _connectionStatus = new();
     private readonly TextBlock _connectedDetails = new();
-    private readonly TextBlock _siteInformation = new();
     private readonly TextBlock _mainStatus = new();
 
     private Border? _connectionPanel;
     private Border? _connectedPanel;
 
-    // Hosts the management view after a successful connection.
     private readonly ContentControl _managementContentHost = new();
-    private MecmDeviceManagementView? _deviceManagementView;
+
+    private MecmManagementView? _managementView;
 
     private readonly MecmConnectionService _connectionService = new();
-    private readonly MecmDeviceService _deviceService;
-    private readonly MecmCollectionService _collectionService;
     private readonly MecmActivityLogService _activityLogService;
 
     private List<MecmConnectionProfile> _profiles = [];
@@ -56,7 +50,8 @@ public class MecmView : UserControl, IDisposable
     private bool _disposed;
 
     private readonly string _connectionFilePath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        Environment.GetFolderPath(
+            Environment.SpecialFolder.LocalApplicationData),
         "NexusIT",
         "mecm-connections.json");
 
@@ -73,8 +68,6 @@ public class MecmView : UserControl, IDisposable
 
     public MecmView()
     {
-        _deviceService = new MecmDeviceService(_connectionService);
-        _collectionService = new MecmCollectionService(_connectionService);
         _activityLogService = new MecmActivityLogService();
 
         Content = BuildInterface();
@@ -83,10 +76,6 @@ public class MecmView : UserControl, IDisposable
         UpdateProfileControls();
         UpdateConnectionControls(false);
     }
-
-    // =========================================================
-    // INTERFACE
-    // =========================================================
 
     private UIElement BuildInterface()
     {
@@ -102,12 +91,15 @@ public class MecmView : UserControl, IDisposable
             new RowDefinition { Height = GridLength.Auto });
 
         root.RowDefinitions.Add(
-            new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            new RowDefinition
+            {
+                Height = new GridLength(1, GridUnitType.Star)
+            });
 
         // Header
         var header = new StackPanel
         {
-            Margin = new Thickness(0, 0, 0, 18)
+            Margin = new Thickness(0, 0, 0, 14)
         };
 
         header.Children.Add(new TextBlock
@@ -120,28 +112,31 @@ public class MecmView : UserControl, IDisposable
 
         header.Children.Add(new TextBlock
         {
-            Text = "Connect to Microsoft Configuration Manager and manage your environment.",
+            Text = "Manage devices, collections and deployments.",
             FontSize = 13,
             Foreground = BrushFrom(MutedColor),
             Margin = new Thickness(0, 5, 0, 0)
         });
 
+        Grid.SetRow(header, 0);
         root.Children.Add(header);
 
-        // Connection panel
+        // Connection panel (visible while disconnected)
         _connectionPanel = CreatePanel();
-        _connectionPanel.Margin = new Thickness(0, 0, 0, 16);
+        _connectionPanel.Margin = new Thickness(0, 0, 0, 12);
 
         var connectionContent = new StackPanel();
 
-        // Saved profiles
         var profileRow = new Grid
         {
-            Margin = new Thickness(0, 0, 0, 16)
+            Margin = new Thickness(0, 0, 0, 14)
         };
 
         profileRow.ColumnDefinitions.Add(
-            new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            new ColumnDefinition
+            {
+                Width = new GridLength(1, GridUnitType.Star)
+            });
 
         profileRow.ColumnDefinitions.Add(
             new ColumnDefinition { Width = GridLength.Auto });
@@ -152,11 +147,15 @@ public class MecmView : UserControl, IDisposable
 
         _profileCombo.MinWidth = 230;
         _profileCombo.Height = 36;
-        _profileCombo.DisplayMemberPath = nameof(MecmConnectionProfile.Name);
+        _profileCombo.DisplayMemberPath =
+            nameof(MecmConnectionProfile.Name);
+
         _profileCombo.Background = BrushFrom(InputColor);
         _profileCombo.Foreground = BrushFrom(TextColor);
         _profileCombo.BorderBrush = BrushFrom("#374151");
-        _profileCombo.SelectionChanged += ProfileCombo_SelectionChanged;
+
+        _profileCombo.SelectionChanged +=
+            ProfileCombo_SelectionChanged;
 
         profilePanel.Children.Add(_profileCombo);
         profileRow.Children.Add(profilePanel);
@@ -168,23 +167,26 @@ public class MecmView : UserControl, IDisposable
         };
 
         AddProfileButton(
-            profileButtons, _addProfileButton, "Add", AccentColor, AddProfile);
+            profileButtons, _addProfileButton, "Add",
+            AccentColor, AddProfile);
 
         AddProfileButton(
-            profileButtons, _updateProfileButton, "Update", "#374151", UpdateProfile);
+            profileButtons, _updateProfileButton, "Update",
+            "#374151", UpdateProfile);
 
         AddProfileButton(
-            profileButtons, _deleteProfileButton, "Delete", "#991B1B", DeleteProfile);
+            profileButtons, _deleteProfileButton, "Delete",
+            "#991B1B", DeleteProfile);
 
         AddProfileButton(
-            profileButtons, _defaultProfileButton, "Set Default", "#374151", SetDefaultProfile);
+            profileButtons, _defaultProfileButton, "Set Default",
+            "#374151", SetDefaultProfile);
 
         Grid.SetColumn(profileButtons, 1);
         profileRow.Children.Add(profileButtons);
 
         connectionContent.Children.Add(profileRow);
 
-        // Connection fields
         var connectionGrid = new Grid();
 
         for (int i = 0; i < 4; i++)
@@ -200,25 +202,16 @@ public class MecmView : UserControl, IDisposable
             new ColumnDefinition { Width = GridLength.Auto });
 
         AddConnectionField(
-            connectionGrid,
-            "Site server",
-            _serverBox,
-            0,
-            "MECM01.school.local");
+            connectionGrid, "Site server", _serverBox,
+            0, "MECM01.school.local");
 
         AddConnectionField(
-            connectionGrid,
-            "Site code",
-            _siteCodeBox,
-            1,
-            "ABC");
+            connectionGrid, "Site code", _siteCodeBox,
+            1, "ABC");
 
         AddConnectionField(
-            connectionGrid,
-            "Username",
-            _usernameBox,
-            2,
-            @"DOMAIN\username");
+            connectionGrid, "Username", _usernameBox,
+            2, @"DOMAIN\username");
 
         var passwordPanel = new StackPanel
         {
@@ -243,12 +236,14 @@ public class MecmView : UserControl, IDisposable
         };
 
         StyleButton(_connectButton, "Connect", AccentColor);
+
         _connectButton.Click += ConnectButton_Click;
         _connectButton.IsDefault = true;
 
         connectionButtons.Children.Add(_connectButton);
 
         StyleButton(_disconnectButton, "Disconnect", "#374151");
+
         _disconnectButton.Margin = new Thickness(0, 6, 0, 0);
         _disconnectButton.Click += (_, _) => Disconnect();
 
@@ -259,7 +254,6 @@ public class MecmView : UserControl, IDisposable
 
         connectionContent.Children.Add(connectionGrid);
 
-        // Connection status
         var statusRow = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -284,21 +278,22 @@ public class MecmView : UserControl, IDisposable
         Grid.SetRow(_connectionPanel, 1);
         root.Children.Add(_connectionPanel);
 
-        // Connected panel
+        // Compact connected status bar
         _connectedPanel = CreatePanel();
-        _connectedPanel.Margin = new Thickness(0, 0, 0, 16);
+        _connectedPanel.Padding = new Thickness(12, 7, 12, 7);
+        _connectedPanel.Margin = new Thickness(0, 0, 0, 10);
         _connectedPanel.Visibility = Visibility.Collapsed;
 
-        var connectedGrid = new Grid
-        {
-            Margin = new Thickness(16, 10, 16, 10)
-        };
+        var connectedGrid = new Grid();
 
         connectedGrid.ColumnDefinitions.Add(
             new ColumnDefinition { Width = GridLength.Auto });
 
         connectedGrid.ColumnDefinitions.Add(
-            new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            new ColumnDefinition
+            {
+                Width = new GridLength(1, GridUnitType.Star)
+            });
 
         connectedGrid.ColumnDefinitions.Add(
             new ColumnDefinition { Width = GridLength.Auto });
@@ -308,19 +303,29 @@ public class MecmView : UserControl, IDisposable
             Text = "● Connected",
             Foreground = BrushFrom("#4ADE80"),
             FontWeight = FontWeights.SemiBold,
-            Margin = new Thickness(0, 0, 18, 0),
-            VerticalAlignment = VerticalAlignment.Center
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 16, 0)
         });
 
         _connectedDetails.Foreground = BrushFrom(TextColor);
-        _connectedDetails.TextWrapping = TextWrapping.Wrap;
-        _connectedDetails.VerticalAlignment = VerticalAlignment.Center;
+        _connectedDetails.FontSize = 12;
+        _connectedDetails.VerticalAlignment =
+            VerticalAlignment.Center;
+        _connectedDetails.TextTrimming = TextTrimming.CharacterEllipsis;
 
         Grid.SetColumn(_connectedDetails, 1);
         connectedGrid.Children.Add(_connectedDetails);
 
-        StyleButton(_connectedDisconnectButton, "Disconnect", "#991B1B");
-        _connectedDisconnectButton.Click += (_, _) => Disconnect();
+        StyleButton(
+            _connectedDisconnectButton,
+            "Disconnect",
+            "#991B1B");
+
+        _connectedDisconnectButton.Padding =
+            new Thickness(12, 5, 12, 5);
+
+        _connectedDisconnectButton.Click +=
+            (_, _) => Disconnect();
 
         Grid.SetColumn(_connectedDisconnectButton, 2);
         connectedGrid.Children.Add(_connectedDisconnectButton);
@@ -330,35 +335,14 @@ public class MecmView : UserControl, IDisposable
         Grid.SetRow(_connectedPanel, 1);
         root.Children.Add(_connectedPanel);
 
-        // Main content
+        // Main management workspace
         var mainPanel = CreatePanel();
+        mainPanel.Padding = new Thickness(12);
 
-        var mainContent = new StackPanel();
+        _managementContentHost.Content =
+            CreateManagementPlaceholder();
 
-        mainContent.Children.Add(CreateSectionTitle("Connection information"));
-
-        _siteInformation.Text =
-            "Connect to a MECM site to retrieve site information.";
-
-        _siteInformation.Foreground = BrushFrom(TextColor);
-        _siteInformation.TextWrapping = TextWrapping.Wrap;
-        _siteInformation.Margin = new Thickness(0, 16, 0, 12);
-
-        mainContent.Children.Add(_siteInformation);
-
-        mainContent.Children.Add(new Separator
-        {
-            Background = BrushFrom("#374151"),
-            Margin = new Thickness(0, 10, 0, 18)
-        });
-
-        mainContent.Children.Add(CreateSectionTitle("MECM Management"));
-
-        _managementContentHost.Content = CreateManagementPlaceholder();
-        _managementContentHost.Margin = new Thickness(0, 12, 0, 0);
-        mainContent.Children.Add(_managementContentHost);
-
-        mainPanel.Child = mainContent;
+        mainPanel.Child = _managementContentHost;
 
         Grid.SetRow(mainPanel, 2);
         root.Children.Add(mainPanel);
@@ -371,7 +355,8 @@ public class MecmView : UserControl, IDisposable
     // =========================================================
 
     private async void ConnectButton_Click(
-        object sender, RoutedEventArgs e)
+        object sender,
+        RoutedEventArgs e)
     {
         if (_isBusy || _connectionService.IsConnected)
             return;
@@ -399,6 +384,7 @@ public class MecmView : UserControl, IDisposable
 
         _connectionStatus.Text = "Connecting...";
         _connectionStatus.Foreground = BrushFrom("#FCD34D");
+
         _mainStatus.Text = "Connecting to the MECM SMS Provider...";
 
         try
@@ -420,35 +406,28 @@ public class MecmView : UserControl, IDisposable
             _connectionStatus.Foreground = BrushFrom("#86EFAC");
 
             _connectedDetails.Text =
-                $"Site server: {_connectionService.SiteServer}    |    " +
-                $"Site code: {_connectionService.SiteCode}    |    " +
-                $"User: {_connectionService.ConnectedUsername}";
-
-            _siteInformation.Text =
-                $"Site server: {_connectionService.SiteServer}\n\n" +
-                $"Site code: {_connectionService.SiteCode}\n\n" +
-                $"Site name: {DisplayValue(_connectionService.SiteName)}\n\n" +
-                $"MECM version: {DisplayValue(_connectionService.SiteVersion)}\n\n" +
-                $"Connected account: {_connectionService.ConnectedUsername}";
+                $"{_connectionService.SiteServer}  |  " +
+                $"Site {_connectionService.SiteCode}  |  " +
+                $"{_connectionService.ConnectedUsername}";
 
             _mainStatus.Text =
-                "Connection successful. MECM management tools can now be added.";
+                "Connection successful. MECM management tools are available.";
 
             UpdateConnectionControls(true);
 
-            // The management view must be hosted here; connecting to the SMS
-            // Provider alone does not automatically display the device tools.
-            _deviceManagementView =
-                new MecmDeviceManagementView(_connectionService);
+            _managementView = new MecmManagementView(
+                _connectionService,
+                _activityLogService);
 
-            _managementContentHost.Content = _deviceManagementView;
+            _managementContentHost.Content = _managementView;
         }
         catch (Exception ex)
         {
             _connectionStatus.Text = "Connection failed";
             _connectionStatus.Foreground = BrushFrom("#FCA5A5");
 
-            _mainStatus.Text = "Could not connect to the MECM SMS Provider.";
+            _mainStatus.Text =
+                "Could not connect to the MECM SMS Provider.";
 
             MessageBox.Show(
                 $"Could not connect to MECM.\n\n{ex.Message}\n\n" +
@@ -466,19 +445,23 @@ public class MecmView : UserControl, IDisposable
 
     private void Disconnect()
     {
-        _deviceManagementView?.SetConnectedState(false);
-        _deviceManagementView = null;
+        if (!_connectionService.IsConnected)
+            return;
+
+        _managementContentHost.Content = null;
+        _managementView = null;
 
         _connectionService.Disconnect();
-        _managementContentHost.Content = CreateManagementPlaceholder();
+
+        _managementContentHost.Content =
+            CreateManagementPlaceholder();
 
         _passwordBox.Clear();
 
         _connectionStatus.Text = "Not connected";
         _connectionStatus.Foreground = BrushFrom("#FCA5A5");
 
-        _siteInformation.Text =
-            "Connect to a MECM site to retrieve site information.";
+        _connectedDetails.Text = string.Empty;
 
         _mainStatus.Text = "Not connected to a MECM site.";
 
@@ -567,7 +550,8 @@ public class MecmView : UserControl, IDisposable
     {
         try
         {
-            string? directory = Path.GetDirectoryName(_connectionFilePath);
+            string? directory =
+                Path.GetDirectoryName(_connectionFilePath);
 
             if (!string.IsNullOrWhiteSpace(directory))
                 Directory.CreateDirectory(directory);
@@ -602,9 +586,11 @@ public class MecmView : UserControl, IDisposable
             _profileCombo.ItemsSource = null;
             _profileCombo.ItemsSource = _profiles;
 
-            MecmConnectionProfile? selected = selectId.HasValue
-                ? _profiles.FirstOrDefault(x => x.Id == selectId.Value)
-                : null;
+            MecmConnectionProfile? selected =
+                selectId.HasValue
+                    ? _profiles.FirstOrDefault(
+                        x => x.Id == selectId.Value)
+                    : null;
 
             selected ??= _profiles.FirstOrDefault(x => x.IsDefault);
             selected ??= _profiles.FirstOrDefault();
@@ -623,10 +609,14 @@ public class MecmView : UserControl, IDisposable
     }
 
     private void ProfileCombo_SelectionChanged(
-        object sender, SelectionChangedEventArgs e)
+        object sender,
+        SelectionChangedEventArgs e)
     {
-        if (_isLoadingProfile || _connectionService.IsConnected)
+        if (_isLoadingProfile ||
+            _connectionService.IsConnected)
+        {
             return;
+        }
 
         if (_profileCombo.SelectedItem is MecmConnectionProfile profile)
             PopulateConnectionFields(profile);
@@ -634,7 +624,8 @@ public class MecmView : UserControl, IDisposable
         UpdateProfileControls();
     }
 
-    private void PopulateConnectionFields(MecmConnectionProfile profile)
+    private void PopulateConnectionFields(
+        MecmConnectionProfile profile)
     {
         _serverBox.Text = profile.SiteServer;
         _siteCodeBox.Text = profile.SiteCode;
@@ -688,10 +679,14 @@ public class MecmView : UserControl, IDisposable
     {
         if (_profileCombo.SelectedItem is not MecmConnectionProfile profile ||
             !ValidateConnectionFields())
+        {
             return;
+        }
 
         profile.SiteServer = _serverBox.Text.Trim();
-        profile.SiteCode = _siteCodeBox.Text.Trim().ToUpperInvariant();
+        profile.SiteCode =
+            _siteCodeBox.Text.Trim().ToUpperInvariant();
+
         profile.Username = _usernameBox.Text.Trim();
 
         SaveConnections();
@@ -708,7 +703,9 @@ public class MecmView : UserControl, IDisposable
             "Delete connection",
             MessageBoxButton.YesNo,
             MessageBoxImage.Warning) != MessageBoxResult.Yes)
+        {
             return;
+        }
 
         bool wasDefault = profile.IsDefault;
 
@@ -743,7 +740,9 @@ public class MecmView : UserControl, IDisposable
 
         if (_siteCodeBox.Text.Trim().Length != 3)
         {
-            MessageBox.Show("Enter a valid three-character MECM site code.");
+            MessageBox.Show(
+                "Enter a valid three-character MECM site code.");
+
             return false;
         }
 
@@ -766,9 +765,14 @@ public class MecmView : UserControl, IDisposable
 
         _profileCombo.IsEnabled = disconnected;
         _addProfileButton.IsEnabled = disconnected;
-        _updateProfileButton.IsEnabled = disconnected && hasSelection;
-        _deleteProfileButton.IsEnabled = disconnected && hasSelection;
-        _defaultProfileButton.IsEnabled = disconnected && hasSelection;
+        _updateProfileButton.IsEnabled =
+            disconnected && hasSelection;
+
+        _deleteProfileButton.IsEnabled =
+            disconnected && hasSelection;
+
+        _defaultProfileButton.IsEnabled =
+            disconnected && hasSelection;
     }
 
     // =========================================================
@@ -817,67 +821,41 @@ public class MecmView : UserControl, IDisposable
         parent.Children.Add(button);
     }
 
-    private static TextBlock CreateManagementPlaceholder() => new()
+    private static TextBlock CreateManagementPlaceholder()
     {
-        Text = "Connect to a MECM site to access device management. " +
-               "Collections, client actions and deployments are not yet available.",
-        Foreground = BrushFrom(MutedColor),
-        FontSize = 13,
-        TextWrapping = TextWrapping.Wrap,
-        Margin = new Thickness(0, 4, 0, 12)
-    };
-
-    private static void AddFeatureRow(
-        Panel parent,
-        string title,
-        string description)
-    {
-        var row = new StackPanel
+        return new TextBlock
         {
-            Margin = new Thickness(0, 0, 0, 14)
-        };
+            Text =
+                "Connect to a MECM site to access device management, " +
+                "collections, deployments and activity logs.",
 
-        row.Children.Add(new TextBlock
-        {
-            Text = title,
-            Foreground = BrushFrom(TextColor),
-            FontSize = 14,
-            FontWeight = FontWeights.SemiBold
-        });
-
-        row.Children.Add(new TextBlock
-        {
-            Text = description,
             Foreground = BrushFrom(MutedColor),
-            FontSize = 12,
-            Margin = new Thickness(0, 4, 0, 0)
-        });
-
-        parent.Children.Add(row);
+            FontSize = 13,
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(0, 4, 0, 12)
+        };
     }
 
-    private static Border CreatePanel() => new()
+    private static Border CreatePanel()
     {
-        Background = BrushFrom(PanelColor),
-        CornerRadius = new CornerRadius(8),
-        Padding = new Thickness(16)
-    };
+        return new Border
+        {
+            Background = BrushFrom(PanelColor),
+            CornerRadius = new CornerRadius(8),
+            Padding = new Thickness(16)
+        };
+    }
 
-    private static TextBlock CreateLabel(string text) => new()
+    private static TextBlock CreateLabel(string text)
     {
-        Text = text,
-        Foreground = BrushFrom(MutedColor),
-        FontSize = 12,
-        Margin = new Thickness(0, 0, 0, 6)
-    };
-
-    private static TextBlock CreateSectionTitle(string text) => new()
-    {
-        Text = text,
-        FontSize = 16,
-        FontWeight = FontWeights.SemiBold,
-        Foreground = Brushes.White
-    };
+        return new TextBlock
+        {
+            Text = text,
+            Foreground = BrushFrom(MutedColor),
+            FontSize = 12,
+            Margin = new Thickness(0, 0, 0, 6)
+        };
+    }
 
     private static void StyleInput(Control control)
     {
@@ -896,19 +874,22 @@ public class MecmView : UserControl, IDisposable
     {
         button.Content = text;
 
-        if (Application.Current.TryFindResource(typeof(Button)) is Style style)
+        if (Application.Current.TryFindResource(
+            typeof(Button)) is Style style)
+        {
             button.Style = style;
+        }
 
         button.Background = BrushFrom(background);
         button.BorderBrush = BrushFrom(background);
         button.Foreground = Brushes.White;
     }
 
-    private static string DisplayValue(string? value) =>
-        string.IsNullOrWhiteSpace(value) ? "Not available" : value;
-
-    private static SolidColorBrush BrushFrom(string color) =>
-        new((Color)ColorConverter.ConvertFromString(color));
+    private static SolidColorBrush BrushFrom(string color)
+    {
+        return new SolidColorBrush(
+            (Color)ColorConverter.ConvertFromString(color));
+    }
 
     // =========================================================
     // DISPOSAL
@@ -921,21 +902,29 @@ public class MecmView : UserControl, IDisposable
 
         _disposed = true;
 
+        _managementContentHost.Content = null;
+        _managementView = null;
+
         _connectionService.Dispose();
         _passwordBox.Clear();
     }
 
     // =========================================================
-    // DATA MODELS
+    // DATA MODEL
     // =========================================================
 
     private sealed class MecmConnectionProfile
     {
         public Guid Id { get; set; } = Guid.NewGuid();
+
         public string Name { get; set; } = string.Empty;
+
         public string SiteServer { get; set; } = string.Empty;
+
         public string SiteCode { get; set; } = string.Empty;
+
         public string Username { get; set; } = string.Empty;
+
         public bool IsDefault { get; set; }
 
         public override string ToString() => Name;
@@ -956,8 +945,12 @@ public class MecmView : UserControl, IDisposable
             Title = "Save MECM Connection";
             Width = 400;
             Height = 215;
-            WindowStartupLocation = WindowStartupLocation.CenterOwner;
+
+            WindowStartupLocation =
+                WindowStartupLocation.CenterOwner;
+
             ResizeMode = ResizeMode.NoResize;
+
             Background = BrushFrom("#111827");
             Foreground = Brushes.White;
 
@@ -976,6 +969,7 @@ public class MecmView : UserControl, IDisposable
             });
 
             StyleInput(_nameBox);
+
             _nameBox.Text = "New MECM Connection";
 
             root.Children.Add(_nameBox);
@@ -988,11 +982,14 @@ public class MecmView : UserControl, IDisposable
             };
 
             var cancel = new Button();
+
             StyleButton(cancel, "Cancel", "#374151");
+
             cancel.Margin = new Thickness(0, 0, 8, 0);
             cancel.Click += (_, _) => DialogResult = false;
 
             var save = new Button();
+
             StyleButton(save, "Save Connection", AccentColor);
 
             save.Click += (_, _) =>

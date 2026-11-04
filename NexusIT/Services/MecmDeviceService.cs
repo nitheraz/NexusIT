@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Management;
 using NexusIT.App.Models;
 
 namespace NexusIT.App.Services;
@@ -17,28 +18,30 @@ public sealed class MecmDeviceService
     }
 
     public List<MecmDevice> SearchDevices(
-        string searchText = "",
+        string searchText,
         int limit = 200)
     {
+        if (string.IsNullOrWhiteSpace(searchText))
+            return new List<MecmDevice>();
+
         if (limit < 1 || limit > 2000)
             throw new ArgumentOutOfRangeException(nameof(limit));
 
+        string safe = EscapeWql(searchText.Trim());
+
         string query =
-            "SELECT ResourceID, Name, UserName " +
-            "FROM SMS_R_System";
-
-        if (!string.IsNullOrWhiteSpace(searchText))
-        {
-            string safe = EscapeWql(searchText.Trim());
-
-            query +=
-                " WHERE Name LIKE '%" + safe + "%' " +
-                "OR UserName LIKE '%" + safe + "%'";
-        }
+            "SELECT ResourceID, Name, LastLogonUserName, " +
+            "OperatingSystemNameandVersion, ClientVersion, Client, " +
+            "ResourceDomainORWorkgroup, SMSUniqueIdentifier, " +
+            "MACAddresses, IPAddresses " +
+            "FROM SMS_R_System " +
+            "WHERE Name LIKE '%" + safe + "%'";
 
         return _connection.Query(query)
             .Take(limit)
             .Select(MapDevice)
+            .Where(device => device.ResourceId > 0)
+            .OrderBy(device => device.Name)
             .ToList();
     }
 
@@ -56,6 +59,32 @@ public sealed class MecmDeviceService
             .FirstOrDefault();
     }
 
+    public void DeleteDevice(int resourceId)
+    {
+        if (resourceId <= 0)
+            throw new ArgumentOutOfRangeException(nameof(resourceId));
+
+        // Verify the device exists before attempting deletion.
+        MecmDevice? device = GetDevice(resourceId);
+
+        if (device == null)
+        {
+            throw new InvalidOperationException(
+                $"MECM device with Resource ID {resourceId} was not found.");
+        }
+
+        ManagementScope scope = _connection.GetConnectedScope();
+
+        var path = new ManagementPath(
+            $"SMS_R_System.ResourceID={resourceId}");
+
+        using var managementObject =
+            new ManagementObject(scope, path, null);
+
+        managementObject.Get();
+        managementObject.Delete();
+    }
+
     private static string EscapeWql(string value)
     {
         return value.Replace("'", "''");
@@ -66,11 +95,14 @@ public sealed class MecmDeviceService
     {
         return new MecmDevice
         {
-            ResourceId = ToInt(row.GetValueOrDefault("ResourceID")),
+            ResourceId = ToInt(
+                row.GetValueOrDefault("ResourceID")),
 
-            Name = ToText(row.GetValueOrDefault("Name")) ?? string.Empty,
+            Name = ToText(
+                row.GetValueOrDefault("Name")) ?? string.Empty,
 
-            UserName = ToText(row.GetValueOrDefault("UserName")),
+            UserName = ToText(
+                row.GetValueOrDefault("LastLogonUserName")),
 
             OperatingSystem = ToText(
                 row.GetValueOrDefault("OperatingSystemNameandVersion")),
@@ -81,11 +113,8 @@ public sealed class MecmDeviceService
             ClientInstalled = ToBool(
                 row.GetValueOrDefault("Client")),
 
-            SiteCode = ToText(
-                row.GetValueOrDefault("SiteCode")),
-
             Domain = ToText(
-                row.GetValueOrDefault("Domain")),
+                row.GetValueOrDefault("ResourceDomainORWorkgroup")),
 
             SmsUniqueIdentifier = ToText(
                 row.GetValueOrDefault("SMSUniqueIdentifier")),
