@@ -119,7 +119,7 @@ public class AdminToolsView : UserControl
 
         customHeader.Children.Add(customTitle);
 
-        var addButton = CreateButton("+  Add tool", Accent);
+        var addButton = CreateButton("+  Add tool", "#3B82F6");
         addButton.Padding = new Thickness(16, 9, 16, 9);
         addButton.VerticalAlignment = VerticalAlignment.Top;
         addButton.Click += (_, _) => AddCustomTool();
@@ -361,8 +361,8 @@ public class AdminToolsView : UserControl
         var actions = new WrapPanel();
 
         var launchButton = CreateButton(
-            "Launch",
-            available ? Accent : BrushFrom("#374151"));
+                "Launch",
+                available ? "#3B82F6" : "#374151");
 
         launchButton.IsEnabled = available;
         launchButton.Click += (_, _) => launch();
@@ -370,9 +370,7 @@ public class AdminToolsView : UserControl
 
         if (edit != null)
         {
-            var editButton = CreateButton(
-                "Edit",
-                BrushFrom("#374151"));
+            var editButton = CreateButton("Edit", "#374151");
 
             editButton.Margin = new Thickness(6, 0, 0, 0);
             editButton.Click += (_, _) => edit();
@@ -381,9 +379,7 @@ public class AdminToolsView : UserControl
 
         if (delete != null)
         {
-            var deleteButton = CreateButton(
-                "Delete",
-                BrushFrom("#7F1D1D"));
+            var deleteButton = CreateButton("Delete", "#7F1D1D");
 
             deleteButton.Margin = new Thickness(6, 0, 0, 0);
             deleteButton.Click += (_, _) => delete();
@@ -406,19 +402,58 @@ public class AdminToolsView : UserControl
         };
     }
 
-    private static Button CreateButton(string text, Brush background)
+
+    private static Button CreateButton(string text, string background)
     {
-        return new Button
+        var button = new Button
         {
             Content = text,
-            Background = background,
-            Foreground = PrimaryText,
-            BorderBrush = BrushFrom("#4B5563"),
-            BorderThickness = new Thickness(1),
             Padding = new Thickness(12, 6, 12, 6),
             Cursor = System.Windows.Input.Cursors.Hand
         };
+
+        ApplyButtonStyle(button, background);
+
+        return button;
     }
+
+    private static void ApplyButtonStyle(Button button, string background)
+    {
+        string styleKey;
+
+        if (string.Equals(
+            background,
+            "#3B82F6",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            styleKey = "PrimaryButton";
+        }
+        else if (background.Contains("991B1B", StringComparison.OrdinalIgnoreCase) ||
+                 background.Contains("7F1D1D", StringComparison.OrdinalIgnoreCase) ||
+                 background.Contains("B65D70", StringComparison.OrdinalIgnoreCase))
+        {
+            styleKey = "DangerButton";
+        }
+        else if (background.Contains("3B9B65", StringComparison.OrdinalIgnoreCase))
+        {
+            styleKey = "SuccessButton";
+        }
+        else if (background.Contains("FBBF24", StringComparison.OrdinalIgnoreCase) ||
+                 background.Contains("A68A49", StringComparison.OrdinalIgnoreCase))
+        {
+            styleKey = "WarningButton";
+        }
+        else
+        {
+            styleKey = "SecondaryButton";
+        }
+
+        if (Application.Current.MainWindow?.TryFindResource(styleKey) is Style style)
+        {
+            button.Style = style;
+        }
+    }
+
 
     private void AddCustomTool()
     {
@@ -771,10 +806,10 @@ public class CustomToolDialog : Window
         {
             Content = "Browse...",
             Padding = new Thickness(12, 7, 12, 7),
-            Margin = new Thickness(8, 0, 0, 0),
-            Background = BrushFrom("#374151"),
-            Foreground = BrushFrom("#F9FAFB")
+            Margin = new Thickness(8, 0, 0, 0)
         };
+
+        ApplyDialogButtonStyle(browse, "#374151");
 
         browse.Click += (_, _) => BrowseExecutable();
 
@@ -803,20 +838,20 @@ public class CustomToolDialog : Window
         {
             Content = "Cancel",
             Padding = new Thickness(16, 8, 16, 8),
-            Background = BrushFrom("#374151"),
-            Foreground = BrushFrom("#F9FAFB"),
             Margin = new Thickness(0, 0, 8, 0),
             IsCancel = true
         };
+
+        ApplyDialogButtonStyle(cancel, "#374151");
 
         var save = new Button
         {
             Content = "Save tool",
             Padding = new Thickness(16, 8, 16, 8),
-            Background = BrushFrom("#3B82F6"),
-            Foreground = BrushFrom("#FFFFFF"),
             IsDefault = true
         };
+
+        ApplyDialogButtonStyle(save, "#3B82F6");
 
         save.Click += (_, _) => SaveTool();
 
@@ -854,6 +889,31 @@ public class CustomToolDialog : Window
             Margin = new Thickness(0, 0, 0, 5)
         };
     }
+    private static void ApplyDialogButtonStyle(
+        Button button,
+        string background)
+    {
+        string styleKey = background.ToUpperInvariant() switch
+        {
+            "#3B82F6" => "PrimaryButton",
+
+            "#991B1B" or
+            "#7F1D1D" => "DangerButton",
+
+            "#3B9B65" => "SuccessButton",
+
+            "#FBBF24" or
+            "#A68A49" => "WarningButton",
+
+            _ => "SecondaryButton"
+        };
+
+        if (Application.Current.MainWindow?.TryFindResource(styleKey) is Style style)
+        {
+            button.Style = style;
+        }
+    }
+
 
     private void BrowseExecutable()
     {

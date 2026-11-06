@@ -19,16 +19,6 @@
             <Setter Property="Margin" Value="0,0,0,14"/>
             <Setter Property="CaretBrush" Value="#F9FAFB"/>
         </Style>
-
-        <Style x:Key="ActionButton" TargetType="Button">
-            <Setter Property="Padding" Value="13,8"/>
-            <Setter Property="Margin" Value="0,0,8,0"/>
-            <Setter Property="Background" Value="#26364B"/>
-            <Setter Property="Foreground" Value="#F9FAFB"/>
-            <Setter Property="BorderBrush" Value="#3B4A60"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -58,8 +48,7 @@
 
             <Button Grid.Column="1"
                     Content="+  New Connection"
-                    Style="{StaticResource ActionButton}"
-                    Background="#2563EB"
+                    Style="{StaticResource PrimaryButton}"
                     Click="NewConnection_Click"/>
         </Grid>
 
@@ -261,20 +250,21 @@
                                    TextWrapping="Wrap"
                                    Margin="0,0,0,18"/>
 
+                        <!-- ACTION BUTTONS -->
                         <WrapPanel>
                             <Button Content="Save"
-                                    Background="#2563EB"
-                                    Style="{StaticResource ActionButton}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Margin="0,0,8,8"
                                     Click="SaveConnection_Click"/>
 
                             <Button Content="Connect"
-                                    Background="#166534"
-                                    Style="{StaticResource ActionButton}"
+                                    Style="{StaticResource SuccessButton}"
+                                    Margin="0,0,8,8"
                                     Click="Connect_Click"/>
 
                             <Button Content="Delete"
-                                    Background="#7F1D1D"
-                                    Style="{StaticResource ActionButton}"
+                                    Style="{StaticResource DangerButton}"
+                                    Margin="0,0,8,8"
                                     Click="DeleteConnection_Click"/>
                         </WrapPanel>
 

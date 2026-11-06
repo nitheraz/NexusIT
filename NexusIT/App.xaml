@@ -19,6 +19,251 @@
         <SolidColorBrush x:Key="BorderBrush" Color="#374151"/>
 
         <!-- ===================================================== -->
+        <!-- GLASS BUTTON GRADIENTS                                -->
+        <!-- ===================================================== -->
+
+        <RadialGradientBrush x:Key="GlassBlueButtonBrush"
+                             Center="0.5,0.5"
+                             GradientOrigin="0.5,0.5"
+                             RadiusX="0.95"
+                             RadiusY="0.95">
+            <GradientStop Color="#FF102442" Offset="0"/>
+            <GradientStop Color="#FF173B62" Offset="0.45"/>
+            <GradientStop Color="#FF376A9D" Offset="1"/>
+        </RadialGradientBrush>
+
+        <RadialGradientBrush x:Key="GlassRedButtonBrush"
+                             Center="0.5,0.5"
+                             GradientOrigin="0.5,0.5"
+                             RadiusX="0.95"
+                             RadiusY="0.95">
+            <GradientStop Color="#FF35151D" Offset="0"/>
+            <GradientStop Color="#FF702A38" Offset="0.45"/>
+            <GradientStop Color="#FFAD5667" Offset="1"/>
+        </RadialGradientBrush>
+
+        <RadialGradientBrush x:Key="GlassGreenButtonBrush"
+                             Center="0.5,0.5"
+                             GradientOrigin="0.5,0.5"
+                             RadiusX="0.95"
+                             RadiusY="0.95">
+            <GradientStop Color="#FF142B28" Offset="0"/>
+            <GradientStop Color="#FF24564A" Offset="0.45"/>
+            <GradientStop Color="#FF548B78" Offset="1"/>
+        </RadialGradientBrush>
+
+        <RadialGradientBrush x:Key="GlassWarningButtonBrush"
+                             Center="0.5,0.5"
+                             GradientOrigin="0.5,0.5"
+                             RadiusX="0.95"
+                             RadiusY="0.95">
+            <GradientStop Color="#FF302613" Offset="0"/>
+            <GradientStop Color="#FF655027" Offset="0.45"/>
+            <GradientStop Color="#FFA68A49" Offset="1"/>
+        </RadialGradientBrush>
+
+        <RadialGradientBrush x:Key="GlassSecondaryButtonBrush"
+                             Center="0.5,0.5"
+                             GradientOrigin="0.5,0.5"
+                             RadiusX="0.95"
+                             RadiusY="0.95">
+            <GradientStop Color="#FF101C30" Offset="0"/>
+            <GradientStop Color="#FF1B3553" Offset="0.55"/>
+            <GradientStop Color="#FF52769A" Offset="1"/>
+        </RadialGradientBrush>
+
+        <DropShadowEffect x:Key="GlassButtonShadow"
+                          Color="#FF000000"
+                          BlurRadius="10"
+                          ShadowDepth="2"
+                          Opacity="0.20"/>
+
+        <!-- ===================================================== -->
+        <!-- BASE GLASS BUTTON                                     -->
+        <!-- ===================================================== -->
+
+        <Style x:Key="BaseButton"
+               TargetType="{x:Type Button}">
+
+            <Setter Property="MinHeight" Value="36"/>
+            <Setter Property="Padding" Value="14,7"/>
+            <Setter Property="Background"
+                    Value="{StaticResource GlassSecondaryButtonBrush}"/>
+            <Setter Property="Foreground" Value="#FFF9FAFB"/>
+            <Setter Property="BorderBrush" Value="#806F8EAF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+
+                        <Grid>
+
+                            <Border x:Name="ButtonBorder"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="9"
+                                    Padding="{TemplateBinding Padding}"
+                                    Effect="{StaticResource GlassButtonShadow}">
+
+                                <ContentPresenter
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                    RecognizesAccessKey="True"/>
+
+                            </Border>
+
+                            <Border x:Name="HoverOverlay"
+                                    Background="#33FFFFFF"
+                                    CornerRadius="9"
+                                    Opacity="0"
+                                    IsHitTestVisible="False"/>
+
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HoverOverlay"
+                                        Property="Opacity"
+                                        Value="0.16"/>
+
+                                <Setter TargetName="ButtonBorder"
+                                        Property="BorderBrush"
+                                        Value="#B3FFFFFF"/>
+                            </Trigger>
+
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="HoverOverlay"
+                                        Property="Opacity"
+                                        Value="0.28"/>
+
+                                <Setter TargetName="ButtonBorder"
+                                        Property="BorderBrush"
+                                        Value="#FFFFFFFF"/>
+                            </Trigger>
+
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="ButtonBorder"
+                                        Property="BorderBrush"
+                                        Value="#FF93C5FD"/>
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Opacity"
+                                        Value="0.4"/>
+
+                                <Setter Property="Cursor"
+                                        Value="Arrow"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ===================================================== -->
+        <!-- DEFAULT BUTTON                                        -->
+        <!-- ===================================================== -->
+
+        <Style TargetType="{x:Type Button}"
+               BasedOn="{StaticResource BaseButton}"/>
+
+        <!-- ===================================================== -->
+        <!-- PRIMARY GLASS BUTTON                                  -->
+        <!-- ===================================================== -->
+
+        <Style x:Key="PrimaryButton"
+               TargetType="{x:Type Button}"
+               BasedOn="{StaticResource BaseButton}">
+
+            <Setter Property="Background"
+                    Value="{StaticResource GlassBlueButtonBrush}"/>
+
+            <Setter Property="BorderBrush" Value="#8060A5FA"/>
+            <Setter Property="Foreground" Value="#FFFFFFFF"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+
+        </Style>
+
+        <!-- ===================================================== -->
+        <!-- SECONDARY GLASS BUTTON                                -->
+        <!-- ===================================================== -->
+
+        <Style x:Key="SecondaryButton"
+               TargetType="{x:Type Button}"
+               BasedOn="{StaticResource BaseButton}">
+
+            <Setter Property="Background"
+                    Value="{StaticResource GlassSecondaryButtonBrush}"/>
+
+            <Setter Property="BorderBrush" Value="#806F8EAF"/>
+            <Setter Property="Foreground" Value="#FFF1F5F9"/>
+
+        </Style>
+
+        <!-- ===================================================== -->
+        <!-- DANGER GLASS BUTTON                                   -->
+        <!-- ===================================================== -->
+
+        <Style x:Key="DangerButton"
+               TargetType="{x:Type Button}"
+               BasedOn="{StaticResource BaseButton}">
+
+            <Setter Property="Background"
+                    Value="{StaticResource GlassRedButtonBrush}"/>
+
+            <Setter Property="BorderBrush" Value="#CCB65D70"/>
+            <Setter Property="Foreground" Value="#FFFECACA"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+
+        </Style>
+
+        <!-- ===================================================== -->
+        <!-- SUCCESS GLASS BUTTON                                  -->
+        <!-- ===================================================== -->
+
+        <Style x:Key="SuccessButton"
+               TargetType="{x:Type Button}"
+               BasedOn="{StaticResource BaseButton}">
+
+            <Setter Property="Background"
+                    Value="{StaticResource GlassGreenButtonBrush}"/>
+
+            <Setter Property="BorderBrush" Value="#CC6AA58C"/>
+            <Setter Property="Foreground" Value="#FFD1FAE5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+
+        </Style>
+
+        <!-- ===================================================== -->
+        <!-- WARNING GLASS BUTTON                                  -->
+        <!-- ===================================================== -->
+
+        <Style x:Key="WarningButton"
+               TargetType="{x:Type Button}"
+               BasedOn="{StaticResource BaseButton}">
+
+            <Setter Property="Background"
+                    Value="{StaticResource GlassWarningButtonBrush}"/>
+
+            <Setter Property="BorderBrush" Value="#CCB69A58"/>
+            <Setter Property="Foreground" Value="#FFFEF3C7"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+
+        </Style>
+
+        <!-- ===================================================== -->
         <!-- GLOBAL COMBOBOX ITEM STYLE                            -->
         <!-- ===================================================== -->
 
@@ -32,15 +277,19 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+
                         <Border x:Name="ItemBorder"
                                 Background="{TemplateBinding Background}"
                                 Padding="{TemplateBinding Padding}">
+
                             <ContentPresenter
                                 HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                 VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+
                         </Border>
 
                         <ControlTemplate.Triggers>
+
                             <Trigger Property="IsHighlighted" Value="True">
                                 <Setter TargetName="ItemBorder"
                                         Property="Background"
@@ -61,7 +310,9 @@
                                 <Setter Property="Foreground"
                                         Value="#6B7280"/>
                             </Trigger>
+
                         </ControlTemplate.Triggers>
+
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -72,13 +323,16 @@
         <!-- ===================================================== -->
 
         <Style TargetType="{x:Type ComboBox}">
+
             <Setter Property="Background" Value="#1F2937"/>
             <Setter Property="Foreground" Value="#F9FAFB"/>
             <Setter Property="BorderBrush" Value="#374151"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="8,6"/>
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
-            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
+                    Value="Disabled"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+                    Value="Auto"/>
 
             <Setter Property="ItemContainerStyle">
                 <Setter.Value>
@@ -89,6 +343,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ComboBox}">
+
                         <Grid>
 
                             <Border x:Name="ComboBorder"
@@ -137,13 +392,12 @@
                                    IsOpen="{TemplateBinding IsDropDownOpen}"
                                    PopupAnimation="Fade">
 
-                                <Border
-                                    Background="#111827"
-                                    BorderBrush="#374151"
-                                    BorderThickness="1"
-                                    CornerRadius="4"
-                                    MinWidth="{Binding ActualWidth,
-                                        RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}">
+                                <Border Background="#111827"
+                                        BorderBrush="#374151"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        MinWidth="{Binding ActualWidth,
+                                            RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}">
 
                                     <ScrollViewer
                                         CanContentScroll="True"
@@ -154,7 +408,9 @@
                                             KeyboardNavigation.DirectionalNavigation="Contained"/>
 
                                     </ScrollViewer>
+
                                 </Border>
+
                             </Popup>
 
                         </Grid>
@@ -165,6 +421,7 @@
                                 <Setter TargetName="ComboBorder"
                                         Property="Background"
                                         Value="#273449"/>
+
                                 <Setter TargetName="ComboBorder"
                                         Property="BorderBrush"
                                         Value="#4B5563"/>
@@ -189,76 +446,7 @@
                             </Trigger>
 
                         </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
 
-        <!-- ===================================================== -->
-        <!-- GLOBAL BUTTON STYLE                                   -->
-        <!-- ===================================================== -->
-
-        <Style TargetType="{x:Type Button}">
-            <!-- Neutral default for buttons not explicitly styled -->
-            <Setter Property="Background" Value="#374151"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="BorderBrush" Value="#4B5563"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="14,8"/>
-            <Setter Property="Margin" Value="3"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Border x:Name="ButtonBorder"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="6"
-                        Padding="{TemplateBinding Padding}">
-
-                            <ContentPresenter
-                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                        RecognizesAccessKey="True"/>
-
-                        </Border>
-
-                        <ControlTemplate.Triggers>
-
-                            <!-- Hover: preserve the button's assigned colour -->
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ButtonBorder"
-                                Property="BorderBrush"
-                                Value="#D1D5DB"/>
-                            </Trigger>
-
-                            <!-- Pressed -->
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="ButtonBorder"
-                                Property="Opacity"
-                                Value="0.75"/>
-                            </Trigger>
-
-                            <!-- Disabled -->
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="ButtonBorder"
-                                Property="Background"
-                                Value="#374151"/>
-                                <Setter TargetName="ButtonBorder"
-                                Property="BorderBrush"
-                                Value="#374151"/>
-                                <Setter TargetName="ButtonBorder"
-                                Property="Opacity"
-                                Value="0.45"/>
-                            </Trigger>
-
-                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>

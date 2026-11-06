@@ -242,7 +242,7 @@ public class MecmView : UserControl, IDisposable
 
         connectionButtons.Children.Add(_connectButton);
 
-        StyleButton(_disconnectButton, "Disconnect", "#374151");
+        StyleButton(_disconnectButton, "Disconnect", "#991B1B");
 
         _disconnectButton.Margin = new Thickness(0, 6, 0, 0);
         _disconnectButton.Click += (_, _) => Disconnect();
@@ -867,6 +867,7 @@ public class MecmView : UserControl, IDisposable
         control.FontSize = 13;
     }
 
+
     private static void StyleButton(
         Button button,
         string text,
@@ -874,16 +875,42 @@ public class MecmView : UserControl, IDisposable
     {
         button.Content = text;
 
-        if (Application.Current.TryFindResource(
-            typeof(Button)) is Style style)
+        string styleKey;
+
+        if (string.Equals(
+            background,
+            AccentColor,
+            StringComparison.OrdinalIgnoreCase))
+        {
+            styleKey = "PrimaryButton";
+        }
+        else if (background.Contains("991B1B", StringComparison.OrdinalIgnoreCase) ||
+                 background.Contains("7F1D1D", StringComparison.OrdinalIgnoreCase) ||
+                 background.Contains("B65D70", StringComparison.OrdinalIgnoreCase))
+        {
+            styleKey = "DangerButton";
+        }
+        else if (background.Contains("3B9B65", StringComparison.OrdinalIgnoreCase))
+        {
+            styleKey = "SuccessButton";
+        }
+        else if (background.Contains("FBBF24", StringComparison.OrdinalIgnoreCase) ||
+                 background.Contains("A68A49", StringComparison.OrdinalIgnoreCase))
+        {
+            styleKey = "WarningButton";
+        }
+        else
+        {
+            styleKey = "SecondaryButton";
+        }
+
+        // Retrieve named styles from MainWindow resources.
+        if (Application.Current.MainWindow?.TryFindResource(styleKey) is Style style)
         {
             button.Style = style;
         }
-
-        button.Background = BrushFrom(background);
-        button.BorderBrush = BrushFrom(background);
-        button.Foreground = Brushes.White;
     }
+
 
     private static SolidColorBrush BrushFrom(string color)
     {

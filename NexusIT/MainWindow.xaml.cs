@@ -1,18 +1,22 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using NexusIT.App.Views;
 using NexusIT.App.Views.Rdp;
+using NexusIT.App.Services;
 
 namespace NexusIT.App;
 
 public partial class MainWindow : Window
 {
     private readonly List<Button> _navigationButtons = [];
+    private readonly ModuleService _moduleService = new();
 
     private static readonly Dictionary<string, string> PageSubtitles = new()
     {
@@ -24,25 +28,44 @@ public partial class MainWindow : Window
         ["RDP"] = "Manage your remote desktop connections.",
         ["Admin Tools"] = "Access your everyday administration utilities.",
         ["Network & System Tools"] = "Network diagnostics and Windows system utilities.",
-        ["Settings"] = "Configure integrations and application preferences."
+        ["Switch Diagnostics"] = "Connect to Aruba switches and troubleshoot network ports and connected devices.",
+        ["Web Tools"] = "Launch and manage your web-based IT administration tools.",
+        ["Settings"] = "Configure modules and application preferences."
     };
 
     public MainWindow()
     {
         InitializeComponent();
+
+        GlobalMouseWheelScrolling.Attach(this);
+
         WindowState = WindowState.Maximized;
 
         Loaded += (_, _) =>
         {
             CollectNavigationButtons(this);
+            ApplyModuleVisibility();
             NavigateTo("Dashboard");
         };
     }
 
+    // =========================================================
+    // NAVIGATION
+    // =========================================================
+
     private void NavigationButton_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button button && button.Tag is string page)
+        {
+            if (page != "Dashboard" &&
+                page != "Settings" &&
+                !_moduleService.IsEnabled(page))
+            {
+                return;
+            }
+
             NavigateTo(page);
+        }
     }
 
     private void NavigateTo(string page)
@@ -62,27 +85,101 @@ public partial class MainWindow : Window
                 StringComparison.OrdinalIgnoreCase);
 
             button.Background = isActive
-                ? BrushFrom("#1D3557")
+                ? BrushFrom("#663B82F6")
                 : Brushes.Transparent;
 
             button.Foreground = isActive
                 ? BrushFrom("#93C5FD")
                 : BrushFrom("#D1D5DB");
+
+            button.BorderBrush = isActive
+                ? BrushFrom("#665B9CF0")
+                : Brushes.Transparent;
         }
 
-        MainContent.Content = page switch
+        switch (page)
         {
-            "Dashboard" => CreateDashboard(),
-            "Chromebooks" => new ChromebookManagementView(),
-            "RDP" => new RdpManagerView(),
-            "Admin Tools" => new AdminToolsView(),
-            "Network & System Tools" => new NetworkSystemToolsView(),
-            "Active Directory" => new ActiveDirectoryView(),
-            "MECM / SCCM" => new MecmView(),
-            _ => CreatePlaceholderPage(page)
-        };
+            case "Dashboard":
+                MainContent.Content = CreateDashboard();
+                break;
+
+            case "Chromebooks":
+                MainContent.Content = new ChromebookManagementView();
+                break;
+
+            case "RDP":
+                MainContent.Content = new RdpManagerView();
+                break;
+
+            case "Admin Tools":
+                MainContent.Content = new AdminToolsView();
+                break;
+
+            case "Network & System Tools":
+                MainContent.Content = new NetworkSystemToolsView();
+                break;
+
+            case "Switch Diagnostics":
+                MainContent.Content = new SwitchManagementView();
+                break;
+
+            case "Active Directory":
+                MainContent.Content = new ActiveDirectoryView();
+                break;
+
+            case "MECM / SCCM":
+                MainContent.Content = new MecmView();
+                break;
+
+            case "Web Tools":
+                MainContent.Content = new WebToolsView();
+                break;
+
+            case "Settings":
+                var settingsView = new SettingsView(_moduleService);
+                settingsView.ModulesChanged += SettingsView_ModulesChanged;
+                MainContent.Content = settingsView;
+                break;
+
+            default:
+                MainContent.Content = CreatePlaceholderPage(page);
+                break;
+        }
 
         StatusText.Text = $"Current workspace: {page}";
+    }
+
+    private void SettingsView_ModulesChanged(object? sender, EventArgs e)
+    {
+        ApplyModuleVisibility();
+
+        string currentPage = CurrentPageTitle.Text;
+
+        if (currentPage != "Dashboard" &&
+            currentPage != "Settings" &&
+            !_moduleService.IsEnabled(currentPage))
+        {
+            NavigateTo("Dashboard");
+        }
+    }
+
+    private void ApplyModuleVisibility()
+    {
+        foreach (Button button in _navigationButtons)
+        {
+            if (button.Tag is not string page)
+                continue;
+
+            if (page == "Dashboard" || page == "Settings")
+            {
+                button.Visibility = Visibility.Visible;
+                continue;
+            }
+
+            button.Visibility = _moduleService.IsEnabled(page)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
     }
 
     private void CollectNavigationButtons(DependencyObject parent)
@@ -99,6 +196,10 @@ public partial class MainWindow : Window
             CollectNavigationButtons(child);
         }
     }
+
+    // =========================================================
+    // DASHBOARD
+    // =========================================================
 
     private UIElement CreateDashboard()
     {
@@ -117,7 +218,7 @@ public partial class MainWindow : Window
         {
             Text = "Everything you need to manage your IT environment, in one place.",
             FontSize = 14,
-            Foreground = BrushFrom("#9CA3AF"),
+            Foreground = BrushFrom("#B0BDCE"),
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(0, 0, 0, 30)
         });
@@ -128,7 +229,7 @@ public partial class MainWindow : Window
             FontSize = 18,
             FontWeight = FontWeights.SemiBold,
             Foreground = BrushFrom("#F9FAFB"),
-            Margin = new Thickness(0, 0, 0, 14)
+            Margin = new Thickness(0, 0, 0, 16)
         });
 
         var cards = new UniformGrid
@@ -137,62 +238,137 @@ public partial class MainWindow : Window
             Rows = 4
         };
 
-        AddDashboardCard(cards, "Chromebooks", "▣",
-            "Search devices and perform bulk operations.", "#93C5FD");
+        if (_moduleService.IsEnabled("Chromebooks"))
+        {
+            AddDashboardCard(
+                cards,
+                "Chromebooks",
+                "▣",
+                "Search devices and perform bulk operations.",
+                "#93C5FD");
+        }
 
-        AddDashboardCard(cards, "Google Groups", "♙",
-            "Manage groups, members and membership roles.", "#86EFAC");
+        if (_moduleService.IsEnabled("Google Groups"))
+        {
+            AddDashboardCard(
+                cards,
+                "Google Groups",
+                "♙",
+                "Manage groups, members and membership roles.",
+                "#86EFAC");
+        }
 
-        AddDashboardCard(cards, "Active Directory", "⌘",
-            "Look up computers, move OUs and manage objects.", "#C4B5FD");
+        if (_moduleService.IsEnabled("Active Directory"))
+        {
+            AddDashboardCard(
+                cards,
+                "Active Directory",
+                "⌘",
+                "Look up computers, move OUs and manage objects.",
+                "#C4B5FD");
+        }
 
-        AddDashboardCard(cards, "MECM / SCCM", "▤",
-            "Manage devices and collection memberships.", "#FCD34D");
+        if (_moduleService.IsEnabled("MECM / SCCM"))
+        {
+            AddDashboardCard(
+                cards,
+                "MECM / SCCM",
+                "▤",
+                "Manage devices and collection memberships.",
+                "#FCD34D");
+        }
 
-        AddDashboardCard(cards, "RDP", "▱",
-            "Open and manage remote desktop connections.", "#67E8F9");
+        if (_moduleService.IsEnabled("RDP"))
+        {
+            AddDashboardCard(
+                cards,
+                "RDP",
+                "▱",
+                "Open and manage remote desktop connections.",
+                "#67E8F9");
+        }
 
-        AddDashboardCard(cards, "Admin Tools", "⚒",
-            "Access the existing miscellaneous admin utilities.", "#F9A8D4");
+        if (_moduleService.IsEnabled("Admin Tools"))
+        {
+            AddDashboardCard(
+                cards,
+                "Admin Tools",
+                "⚒",
+                "Access the existing miscellaneous admin utilities.",
+                "#F9A8D4");
+        }
 
-        AddDashboardCard(cards, "Settings", "⚙",
-            "Configure integrations and application preferences.", "#D1D5DB");
+        if (_moduleService.IsEnabled("Network & System Tools"))
+        {
+            AddDashboardCard(
+                cards,
+                "Network & System Tools",
+                "⌘",
+                "Network diagnostics and Windows system utilities.",
+                "#A5B4FC");
+        }
+
+        if (_moduleService.IsEnabled("Web Tools"))
+        {
+            AddDashboardCard(
+                cards,
+                "Web Tools",
+                "🌐",
+                "Launch Google Admin, ServiceNow, Aruba Central and other web-based IT systems.",
+                "#60A5FA");
+        }
+
+        AddDashboardCard(
+            cards,
+            "Settings",
+            "⚙",
+            "Configure modules and application preferences.",
+            "#D1D5DB");
 
         page.Children.Add(cards);
 
+        // GETTING STARTED GLASS PANEL
+
+        var noteContent = new StackPanel();
+
+        noteContent.Children.Add(new TextBlock
+        {
+            Text = "Getting started",
+            FontWeight = FontWeights.SemiBold,
+            FontSize = 14,
+            Foreground = BrushFrom("#F9FAFB"),
+            Margin = new Thickness(0, 0, 0, 7)
+        });
+
+        noteContent.Children.Add(new TextBlock
+        {
+            Text = "Nexus IT brings your IT administration workspaces together in one place. Enable the modules your organisation needs from Settings.",
+            Foreground = BrushFrom("#B0BDCE"),
+            TextWrapping = TextWrapping.Wrap,
+            FontSize = 13,
+            LineHeight = 20
+        });
+
         var note = new Border
         {
-            Background = BrushFrom("#172033"),
-            BorderBrush = BrushFrom("#29364B"),
+            Background = CreateGlassGradient(),
+            BorderBrush = BrushFrom("#665F7896"),
             BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(10),
-            Padding = new Thickness(16),
-            Margin = new Thickness(0, 24, 0, 0),
-            Child = new StackPanel
-            {
-                Children =
-                {
-                    new TextBlock
-                    {
-                        Text = "Getting started",
-                        FontWeight = FontWeights.SemiBold,
-                        Foreground = BrushFrom("#F9FAFB"),
-                        Margin = new Thickness(0, 0, 0, 6)
-                    },
-                    new TextBlock
-                    {
-                        Text = "The application shell is ready for development. " +
-                               "Management integrations are being connected in stages.",
-                        Foreground = BrushFrom("#9CA3AF"),
-                        TextWrapping = TextWrapping.Wrap
-                    }
-                }
-            }
+            CornerRadius = new CornerRadius(14),
+            Padding = new Thickness(20),
+            Margin = new Thickness(0, 12, 0, 0),
+            Child = noteContent,
+            Effect = CreateGlassShadow()
         };
 
         page.Children.Add(note);
+
         return page;
     }
+
+    // =========================================================
+    // DASHBOARD CARDS
+    // =========================================================
 
     private void AddDashboardCard(
         Panel parent,
@@ -203,6 +379,8 @@ public partial class MainWindow : Window
     {
         var content = new StackPanel();
 
+        // CARD HEADING
+
         var heading = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -212,9 +390,9 @@ public partial class MainWindow : Window
         heading.Children.Add(new TextBlock
         {
             Text = icon,
-            FontSize = 24,
+            FontSize = 25,
             Foreground = BrushFrom(accent),
-            Width = 42,
+            Width = 44,
             VerticalAlignment = VerticalAlignment.Center
         });
 
@@ -229,14 +407,18 @@ public partial class MainWindow : Window
 
         content.Children.Add(heading);
 
+        // DESCRIPTION
+
         content.Children.Add(new TextBlock
         {
             Text = description,
             FontSize = 12,
-            Foreground = BrushFrom("#9CA3AF"),
+            Foreground = BrushFrom("#B0BDCE"),
             TextWrapping = TextWrapping.Wrap,
             LineHeight = 19
         });
+
+        // OPEN WORKSPACE LABEL
 
         content.Children.Add(new TextBlock
         {
@@ -247,18 +429,23 @@ public partial class MainWindow : Window
             Margin = new Thickness(0, 16, 0, 0)
         });
 
+        // RADIAL GLASS CARD
+
         var card = new Border
         {
-            Background = BrushFrom("#1F2937"),
-            BorderBrush = BrushFrom("#303B4B"),
+            Background = CreateGlassGradient(),
+            BorderBrush = BrushFrom("#665F7896"),
             BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(12),
+            CornerRadius = new CornerRadius(14),
             Padding = new Thickness(20),
             Margin = new Thickness(0, 0, 14, 14),
             MinHeight = 155,
             Cursor = Cursors.Hand,
-            Child = content
+            Child = content,
+            Effect = CreateGlassShadow()
         };
+
+        // CARD CLICK
 
         card.MouseLeftButtonUp += (_, e) =>
         {
@@ -266,34 +453,104 @@ public partial class MainWindow : Window
             e.Handled = true;
         };
 
+        // HOVER EFFECT
+
         card.MouseEnter += (_, _) =>
         {
-            card.Background = BrushFrom("#273449");
+            card.Background = CreateGlassHoverGradient();
             card.BorderBrush = BrushFrom(accent);
+            card.Effect = CreateGlassHoverShadow();
         };
 
         card.MouseLeave += (_, _) =>
         {
-            card.Background = BrushFrom("#1F2937");
-            card.BorderBrush = BrushFrom("#303B4B");
+            card.Background = CreateGlassGradient();
+            card.BorderBrush = BrushFrom("#665F7896");
+            card.Effect = CreateGlassShadow();
         };
 
         parent.Children.Add(card);
     }
 
+    // =========================================================
+    // RADIAL GLASS GRADIENT HELPERS
+    // =========================================================
+
+    private static RadialGradientBrush CreateGlassGradient()
+    {
+        return new RadialGradientBrush
+        {
+            // Darkest point in the centre
+            Center = new Point(0.5, 0.5),
+            GradientOrigin = new Point(0.5, 0.5),
+
+            // Light fades towards the outside edges
+            RadiusX = 0.95,
+            RadiusY = 0.95,
+
+            GradientStops =
+            {
+                new GradientStop(Color.FromArgb(245, 12, 24, 43), 0.0),
+                new GradientStop(Color.FromArgb(235, 17, 33, 56), 0.35),
+                new GradientStop(Color.FromArgb(225, 30, 56, 86), 0.70),
+                new GradientStop(Color.FromArgb(215, 58, 88, 125), 1.0)
+            }
+        };
+    }
+
+    private static RadialGradientBrush CreateGlassHoverGradient()
+    {
+        return new RadialGradientBrush
+        {
+            Center = new Point(0.5, 0.5),
+            GradientOrigin = new Point(0.5, 0.5),
+
+            RadiusX = 0.95,
+            RadiusY = 0.95,
+
+            GradientStops =
+            {
+                new GradientStop(Color.FromArgb(250, 14, 29, 51), 0.0),
+                new GradientStop(Color.FromArgb(245, 21, 43, 72), 0.35),
+                new GradientStop(Color.FromArgb(240, 39, 72, 111), 0.70),
+                new GradientStop(Color.FromArgb(235, 76, 115, 160), 1.0)
+            }
+        };
+    }
+
+    // =========================================================
+    // GLASS SHADOW HELPERS
+    // =========================================================
+
+    private static DropShadowEffect CreateGlassShadow()
+    {
+        return new DropShadowEffect
+        {
+            Color = Color.FromRgb(0, 0, 0),
+            BlurRadius = 16,
+            ShadowDepth = 3,
+            Opacity = 0.18
+        };
+    }
+
+    private static DropShadowEffect CreateGlassHoverShadow()
+    {
+        return new DropShadowEffect
+        {
+            Color = Color.FromRgb(59, 130, 246),
+            BlurRadius = 24,
+            ShadowDepth = 2,
+            Opacity = 0.28
+        };
+    }
+
+    // =========================================================
+    // PLACEHOLDER PAGE
+    // =========================================================
+
     private UIElement CreatePlaceholderPage(string page)
     {
         var container = new StackPanel();
-
-        var panel = new Border
-        {
-            Background = BrushFrom("#1F2937"),
-            BorderBrush = BrushFrom("#303B4B"),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(12),
-            Padding = new Thickness(26),
-            Margin = new Thickness(0, 0, 0, 20)
-        };
 
         var content = new StackPanel();
 
@@ -311,7 +568,7 @@ public partial class MainWindow : Window
             Text = PageSubtitles.TryGetValue(page, out string? subtitle)
                 ? subtitle
                 : "Manage your IT environment.",
-            Foreground = BrushFrom("#9CA3AF"),
+            Foreground = BrushFrom("#B0BDCE"),
             FontSize = 14,
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(0, 0, 0, 20)
@@ -319,10 +576,10 @@ public partial class MainWindow : Window
 
         content.Children.Add(new Border
         {
-            Background = BrushFrom("#332B1B"),
-            BorderBrush = BrushFrom("#66502B"),
+            Background = BrushFrom("#663B3020"),
+            BorderBrush = BrushFrom("#997F6330"),
             BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(7),
+            CornerRadius = new CornerRadius(9),
             Padding = new Thickness(12, 9, 12, 9),
             HorizontalAlignment = HorizontalAlignment.Left,
             Child = new TextBlock
@@ -345,25 +602,44 @@ public partial class MainWindow : Window
             MaxWidth = 650
         });
 
-        panel.Child = content;
+        var panel = new Border
+        {
+            Background = CreateGlassGradient(),
+            BorderBrush = BrushFrom("#665F7896"),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(14),
+            Padding = new Thickness(26),
+            Margin = new Thickness(0, 0, 0, 20),
+            Child = content,
+            Effect = CreateGlassShadow()
+        };
+
         container.Children.Add(panel);
+
+        // BACK TO DASHBOARD
 
         var backButton = new Button
         {
             Content = "←  Back to Dashboard",
             Padding = new Thickness(15, 9, 15, 9),
-            Background = BrushFrom("#26364B"),
+            Background = BrushFrom("#B3263F5B"),
             Foreground = BrushFrom("#F9FAFB"),
-            BorderThickness = new Thickness(0),
+            BorderBrush = BrushFrom("#665F7896"),
+            BorderThickness = new Thickness(1),
             Cursor = Cursors.Hand,
             HorizontalAlignment = HorizontalAlignment.Left
         };
 
         backButton.Click += (_, _) => NavigateTo("Dashboard");
+
         container.Children.Add(backButton);
 
         return container;
     }
+
+    // =========================================================
+    // COLOUR HELPER
+    // =========================================================
 
     private static SolidColorBrush BrushFrom(string color)
     {

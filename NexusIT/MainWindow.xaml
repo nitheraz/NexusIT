@@ -2,6 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Nexus IT"
+        Icon="pack://application:,,,/Assets/NexusIT.ico"
         Width="1440"
         Height="900"
         MinWidth="1050"
@@ -10,59 +11,790 @@
         Background="{StaticResource AppBackground}"
         Foreground="{StaticResource PrimaryText}"
         FontFamily="Segoe UI"
-        FontSize="14">
+        FontSize="14"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
 
     <Window.Resources>
-        <Style x:Key="NavigationButton" TargetType="Button">
-            <Setter Property="Height" Value="44"/>
-            <Setter Property="Margin" Value="0,3,0,3"/>
-            <Setter Property="Padding" Value="12,0"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Foreground" Value="#D1D5DB"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="ButtonBorder"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="7"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter
-                                VerticalAlignment="Center"
-                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ButtonBorder"
-                                        Property="Background" Value="#1F2937"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Opacity" Value="0.5"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+
+        <!-- ================================================== -->
+        <!-- COLOUR PALETTE                                     -->
+        <!-- ================================================== -->
+
+        <SolidColorBrush x:Key="NexusBackground" Color="#111827"/>
+        <SolidColorBrush x:Key="NexusSidebar" Color="#D90B1424"/>
+
+        <SolidColorBrush x:Key="NexusPanel" Color="#B31B2B42"/>
+        <SolidColorBrush x:Key="NexusPanelSecondary" Color="#CC202F46"/>
+        <SolidColorBrush x:Key="NexusPanelHover" Color="#D92D4562"/>
+
+        <SolidColorBrush x:Key="NexusBorder" Color="#665F7896"/>
+        <SolidColorBrush x:Key="NexusBorderSubtle" Color="#4D526A83"/>
+        <SolidColorBrush x:Key="NexusBorderHighlight" Color="#806F8EAF"/>
+
+        <SolidColorBrush x:Key="NexusAccent" Color="#3B82F6"/>
+        <SolidColorBrush x:Key="NexusAccentHover" Color="#60A5FA"/>
+        <SolidColorBrush x:Key="NexusAccentPressed" Color="#2563EB"/>
+        <SolidColorBrush x:Key="NexusAccentMuted" Color="#803B82F6"/>
+
+        <SolidColorBrush x:Key="NexusTextPrimary" Color="#F9FAFB"/>
+        <SolidColorBrush x:Key="NexusTextSecondary" Color="#D1D5DB"/>
+        <SolidColorBrush x:Key="NexusTextMuted" Color="#9CA3AF"/>
+        <SolidColorBrush x:Key="NexusTextDisabled" Color="#6B7280"/>
+
+        <SolidColorBrush x:Key="NexusSuccess" Color="#4ADE80"/>
+        <SolidColorBrush x:Key="NexusWarning" Color="#FBBF24"/>
+        <SolidColorBrush x:Key="NexusDanger" Color="#F87171"/>
+
+        <!-- ================================================== -->
+        <!-- BACKGROUND GRADIENTS                               -->
+        <!-- ================================================== -->
+
+        <LinearGradientBrush x:Key="MainWindowGradient"
+                             StartPoint="0,0"
+                             EndPoint="1,1">
+            <GradientStop Color="#111827" Offset="0"/>
+            <GradientStop Color="#172B45" Offset="0.55"/>
+            <GradientStop Color="#1E3A5F" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="GlassSurfaceBrush"
+                             StartPoint="0,0"
+                             EndPoint="1,1">
+            <GradientStop Color="#CC263B55" Offset="0"/>
+            <GradientStop Color="#B31B2D45" Offset="0.55"/>
+            <GradientStop Color="#A616263B" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="GlassSurfaceHoverBrush"
+                             StartPoint="0,0"
+                             EndPoint="1,1">
+            <GradientStop Color="#E0354E6B" Offset="0"/>
+            <GradientStop Color="#CC263F5B" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="GlassSidebarBrush"
+                             StartPoint="0,0"
+                             EndPoint="1,1">
+            <GradientStop Color="#F20B1424" Offset="0"/>
+            <GradientStop Color="#E6101D30" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="GlassHeaderBrush"
+                             StartPoint="0,0"
+                             EndPoint="1,0">
+            <GradientStop Color="#E61A2639" Offset="0"/>
+            <GradientStop Color="#D916263B" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="GlassAccentBrush"
+                             StartPoint="0,0"
+                             EndPoint="1,1">
+            <GradientStop Color="#60A5FA" Offset="0"/>
+            <GradientStop Color="#3B82F6" Offset="0.55"/>
+            <GradientStop Color="#2563EB" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="GlassInputBrush"
+                             StartPoint="0,0"
+                             EndPoint="1,1">
+            <GradientStop Color="#C9142235" Offset="0"/>
+            <GradientStop Color="#B3111E30" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- ================================================== -->
+        <!-- RADIAL GLASS BUTTON GRADIENTS                      -->
+        <!-- ================================================== -->
+
+        <!-- Standard blue action -->
+
+        <RadialGradientBrush x:Key="GlassBlueButtonBrush"
+                             Center="0.5,0.5"
+                             GradientOrigin="0.5,0.5"
+                             RadiusX="0.95"
+                             RadiusY="0.95">
+            <GradientStop Color="#FF102442" Offset="0"/>
+            <GradientStop Color="#FF173B62" Offset="0.45"/>
+            <GradientStop Color="#FF376A9D" Offset="1"/>
+        </RadialGradientBrush>
+
+        <!-- Destructive / disconnect action -->
+
+        <RadialGradientBrush x:Key="GlassRedButtonBrush"
+                             Center="0.5,0.5"
+                             GradientOrigin="0.5,0.5"
+                             RadiusX="0.95"
+                             RadiusY="0.95">
+            <GradientStop Color="#FF35151D" Offset="0"/>
+            <GradientStop Color="#FF702A38" Offset="0.45"/>
+            <GradientStop Color="#FFAD5667" Offset="1"/>
+        </RadialGradientBrush>
+
+        <!-- Success / connect action -->
+
+        <RadialGradientBrush x:Key="GlassGreenButtonBrush"
+                             Center="0.5,0.5"
+                             GradientOrigin="0.5,0.5"
+                             RadiusX="0.95"
+                             RadiusY="0.95">
+            <GradientStop Color="#FF142B28" Offset="0"/>
+            <GradientStop Color="#FF24564A" Offset="0.45"/>
+            <GradientStop Color="#FF548B78" Offset="1"/>
+        </RadialGradientBrush>
+
+        <!-- Warning action -->
+
+        <RadialGradientBrush x:Key="GlassWarningButtonBrush"
+                             Center="0.5,0.5"
+                             GradientOrigin="0.5,0.5"
+                             RadiusX="0.95"
+                             RadiusY="0.95">
+            <GradientStop Color="#FF302613" Offset="0"/>
+            <GradientStop Color="#FF655027" Offset="0.45"/>
+            <GradientStop Color="#FFA68A49" Offset="1"/>
+        </RadialGradientBrush>
+
+        <!-- Neutral / secondary action -->
+
+        <RadialGradientBrush x:Key="GlassSecondaryButtonBrush"
+                             Center="0.5,0.5"
+                             GradientOrigin="0.5,0.5"
+                             RadiusX="0.95"
+                             RadiusY="0.95">
+            <GradientStop Color="#FF101C30" Offset="0"/>
+            <GradientStop Color="#FF1B3553" Offset="0.55"/>
+            <GradientStop Color="#FF52769A" Offset="1"/>
+        </RadialGradientBrush>
+
+        <!-- Button shadow -->
+
+        <DropShadowEffect x:Key="GlassButtonShadow"
+                          Color="#FF000000"
+                          BlurRadius="10"
+                          ShadowDepth="2"
+                          Opacity="0.20"/>
+
+        <!-- ================================================== -->
+        <!-- TYPOGRAPHY                                         -->
+        <!-- ================================================== -->
 
         <Style x:Key="PageTitle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="25"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#F9FAFB"/>
+            <Setter Property="Foreground" Value="{StaticResource NexusTextPrimary}"/>
         </Style>
 
         <Style x:Key="SectionTitle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="17"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#F9FAFB"/>
+            <Setter Property="Foreground" Value="{StaticResource NexusTextPrimary}"/>
             <Setter Property="Margin" Value="0,0,0,12"/>
         </Style>
+
+        <Style x:Key="SectionSubtitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{StaticResource NexusTextMuted}"/>
+            <Setter Property="Margin" Value="0,2,0,10"/>
+        </Style>
+
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource NexusTextSecondary}"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+
+        <!-- ================================================== -->
+        <!-- GLASS PANEL                                        -->
+        <!-- ================================================== -->
+
+        <Style x:Key="PanelCard" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource GlassSurfaceBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource NexusBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="18"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+        </Style>
+
+        <!-- ================================================== -->
+        <!-- BUTTONS                                            -->
+        <!-- ================================================== -->
+
+        <Style x:Key="BaseButton" TargetType="Button">
+            <Setter Property="MinHeight" Value="36"/>
+            <Setter Property="Padding" Value="14,7"/>
+            <Setter Property="Background" Value="{StaticResource GlassSecondaryButtonBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource NexusTextPrimary}"/>
+            <Setter Property="BorderBrush" Value="#806F8EAF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+
+                        <Grid>
+
+                            <Border x:Name="ButtonBorder"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="9"
+                                    Padding="{TemplateBinding Padding}"
+                                    Effect="{StaticResource GlassButtonShadow}">
+
+                                <ContentPresenter
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                    RecognizesAccessKey="True"/>
+
+                            </Border>
+
+                            <!-- Glass highlight overlay -->
+
+                            <Border x:Name="HoverOverlay"
+                                    Background="#33FFFFFF"
+                                    CornerRadius="9"
+                                    Opacity="0"
+                                    IsHitTestVisible="False"/>
+
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+
+                            <!-- Hover -->
+
+                            <Trigger Property="IsMouseOver" Value="True">
+
+                                <Setter TargetName="HoverOverlay"
+                                        Property="Opacity"
+                                        Value="0.16"/>
+
+                                <Setter TargetName="ButtonBorder"
+                                        Property="BorderBrush"
+                                        Value="#B3FFFFFF"/>
+
+                            </Trigger>
+
+                            <!-- Pressed -->
+
+                            <Trigger Property="IsPressed" Value="True">
+
+                                <Setter TargetName="HoverOverlay"
+                                        Property="Opacity"
+                                        Value="0.28"/>
+
+                                <Setter TargetName="ButtonBorder"
+                                        Property="BorderBrush"
+                                        Value="#FFFFFFFF"/>
+
+                            </Trigger>
+
+                            <!-- Keyboard focus -->
+
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+
+                                <Setter TargetName="ButtonBorder"
+                                        Property="BorderBrush"
+                                        Value="#FF93C5FD"/>
+
+                            </Trigger>
+
+                            <!-- Disabled -->
+
+                            <Trigger Property="IsEnabled" Value="False">
+
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Opacity"
+                                        Value="0.4"/>
+
+                                <Setter Property="Cursor"
+                                        Value="Arrow"/>
+
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Default button -->
+
+        <Style TargetType="Button"
+               BasedOn="{StaticResource BaseButton}"/>
+
+        <!-- Primary blue button -->
+
+        <Style x:Key="PrimaryButton"
+               TargetType="Button"
+               BasedOn="{StaticResource BaseButton}">
+
+            <Setter Property="Background"
+                    Value="{StaticResource GlassBlueButtonBrush}"/>
+
+            <Setter Property="BorderBrush"
+                    Value="#8060A5FA"/>
+
+            <Setter Property="Foreground"
+                    Value="#FFFFFFFF"/>
+
+            <Setter Property="FontWeight"
+                    Value="SemiBold"/>
+
+        </Style>
+
+        <!-- Secondary button -->
+
+        <Style x:Key="SecondaryButton"
+               TargetType="Button"
+               BasedOn="{StaticResource BaseButton}">
+
+            <Setter Property="Background"
+                    Value="{StaticResource GlassSecondaryButtonBrush}"/>
+
+            <Setter Property="BorderBrush"
+                    Value="#806F8EAF"/>
+
+            <Setter Property="Foreground"
+                    Value="#FFF1F5F9"/>
+
+        </Style>
+
+        <!-- Red destructive / disconnect button -->
+
+        <Style x:Key="DangerButton"
+               TargetType="Button"
+               BasedOn="{StaticResource BaseButton}">
+
+            <Setter Property="Background"
+                    Value="{StaticResource GlassRedButtonBrush}"/>
+
+            <Setter Property="BorderBrush"
+                    Value="#CCB65D70"/>
+
+            <Setter Property="Foreground"
+                    Value="#FFFECACA"/>
+
+            <Setter Property="FontWeight"
+                    Value="SemiBold"/>
+
+        </Style>
+
+        <!-- Green success / connect button -->
+
+        <Style x:Key="SuccessButton"
+               TargetType="Button"
+               BasedOn="{StaticResource BaseButton}">
+
+            <Setter Property="Background"
+                    Value="{StaticResource GlassGreenButtonBrush}"/>
+
+            <Setter Property="BorderBrush"
+                    Value="#CC6AA58C"/>
+
+            <Setter Property="Foreground"
+                    Value="#FFD1FAE5"/>
+
+            <Setter Property="FontWeight"
+                    Value="SemiBold"/>
+
+        </Style>
+
+        <!-- Amber warning button -->
+
+        <Style x:Key="WarningButton"
+               TargetType="Button"
+               BasedOn="{StaticResource BaseButton}">
+
+            <Setter Property="Background"
+                    Value="{StaticResource GlassWarningButtonBrush}"/>
+
+            <Setter Property="BorderBrush"
+                    Value="#CCB69A58"/>
+
+            <Setter Property="Foreground"
+                    Value="#FFFEF3C7"/>
+
+            <Setter Property="FontWeight"
+                    Value="SemiBold"/>
+
+        </Style>
+
+        <!-- ================================================== -->
+        <!-- NAVIGATION                                         -->
+        <!-- ================================================== -->
+
+        <Style x:Key="NavigationButton"
+               TargetType="Button"
+               BasedOn="{StaticResource BaseButton}">
+
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="Margin" Value="0,3,0,3"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Foreground" Value="#D1D5DB"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+
+                        <Grid>
+
+                            <Border x:Name="NavBackground"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="9"
+                                    Padding="{TemplateBinding Padding}">
+
+                                <ContentPresenter
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+
+                            </Border>
+
+                            <Border x:Name="ActiveIndicator"
+                                    Width="3"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Height="22"
+                                    CornerRadius="2"
+                                    Background="{StaticResource NexusAccent}"
+                                    Opacity="0"/>
+
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+
+                                <Setter TargetName="NavBackground"
+                                        Property="Background"
+                                        Value="#663B82F6"/>
+
+                                <Setter TargetName="NavBackground"
+                                        Property="BorderBrush"
+                                        Value="#665B9CF0"/>
+
+                                <Setter Property="Foreground"
+                                        Value="#FFFFFF"/>
+
+                                <Setter TargetName="ActiveIndicator"
+                                        Property="Opacity"
+                                        Value="0.7"/>
+
+                            </Trigger>
+
+                            <Trigger Property="IsPressed" Value="True">
+
+                                <Setter TargetName="NavBackground"
+                                        Property="Background"
+                                        Value="#993B82F6"/>
+
+                                <Setter TargetName="ActiveIndicator"
+                                        Property="Opacity"
+                                        Value="1"/>
+
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ================================================== -->
+        <!-- TEXT BOX                                           -->
+        <!-- ================================================== -->
+
+        <Style TargetType="TextBox">
+            <Setter Property="MinHeight" Value="36"/>
+            <Setter Property="Padding" Value="10,7"/>
+            <Setter Property="Background" Value="{StaticResource GlassInputBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource NexusTextPrimary}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource NexusBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CaretBrush" Value="{StaticResource NexusAccentHover}"/>
+            <Setter Property="SelectionBrush" Value="{StaticResource NexusAccent}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+
+            <Style.Triggers>
+
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="#997FA3C9"/>
+                </Trigger>
+
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="{StaticResource NexusAccentHover}"/>
+                </Trigger>
+
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.45"/>
+                </Trigger>
+
+            </Style.Triggers>
+        </Style>
+
+        <!-- ================================================== -->
+        <!-- COMBO BOX                                          -->
+        <!-- ================================================== -->
+
+        <Style TargetType="{x:Type ComboBox}">
+            <Setter Property="Foreground" Value="#F1F5F9"/>
+            <Setter Property="Background" Value="#26364D"/>
+            <Setter Property="BorderBrush" Value="#526782"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,7"/>
+            <Setter Property="MinHeight" Value="36"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBox}">
+
+                        <Grid>
+
+                            <Border x:Name="ComboBorder"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="6"/>
+
+                            <Grid>
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="32"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ContentPresenter
+                                    Grid.Column="0"
+                                    Margin="{TemplateBinding Padding}"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    Content="{TemplateBinding SelectionBoxItem}"
+                                    ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                    ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                    TextElement.Foreground="{TemplateBinding Foreground}"/>
+
+                                <ToggleButton
+                                    Grid.Column="1"
+                                    Focusable="False"
+                                    IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                    ClickMode="Press"
+                                    Background="Transparent"
+                                    BorderThickness="0">
+
+                                    <TextBlock Text="▼"
+                                               Foreground="#CBD5E1"
+                                               FontSize="10"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+
+                                </ToggleButton>
+
+                            </Grid>
+
+                            <Popup x:Name="PART_Popup"
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Fade">
+
+                                <Border Background="#1B2940"
+                                        BorderBrush="#526782"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                        Margin="0,4,0,0">
+
+                                    <ScrollViewer MaxHeight="300"
+                                                  CanContentScroll="True">
+
+                                        <ItemsPresenter/>
+
+                                    </ScrollViewer>
+
+                                </Border>
+
+                            </Popup>
+
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ComboBorder"
+                                        Property="BorderBrush"
+                                        Value="#60A5FA"/>
+                            </Trigger>
+
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter TargetName="ComboBorder"
+                                        Property="BorderBrush"
+                                        Value="#3B82F6"/>
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type ComboBoxItem}">
+            <Setter Property="Foreground" Value="#F1F5F9"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+
+                        <Border x:Name="ItemBorder"
+                                Background="{TemplateBinding Background}"
+                                Padding="{TemplateBinding Padding}">
+
+                            <ContentPresenter
+                                VerticalAlignment="Center"
+                                TextElement.Foreground="{TemplateBinding Foreground}"/>
+
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="ItemBorder"
+                                        Property="Background"
+                                        Value="#344B68"/>
+                            </Trigger>
+
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="ItemBorder"
+                                        Property="Background"
+                                        Value="#263F63"/>
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ================================================== -->
+        <!-- CHECKBOX                                           -->
+        <!-- ================================================== -->
+
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{StaticResource NexusTextSecondary}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,3"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <!-- ================================================== -->
+        <!-- DATA GRID                                          -->
+        <!-- ================================================== -->
+
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="#80172538"/>
+            <Setter Property="Foreground" Value="{StaticResource NexusTextPrimary}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource NexusBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RowBackground" Value="#661B2940"/>
+            <Setter Property="AlternatingRowBackground" Value="#88202F46"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#553F5875"/>
+            <Setter Property="VerticalGridLinesBrush" Value="#3329384E"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserResizeRows" Value="False"/>
+            <Setter Property="RowHeaderWidth" Value="0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="SelectionUnit" Value="FullRow"/>
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        </Style>
+
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#E617293F"/>
+            <Setter Property="Foreground" Value="#CBD5E1"/>
+            <Setter Property="BorderBrush" Value="#66526A83"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+
+        <Style TargetType="DataGridRow">
+            <Setter Property="MinHeight" Value="36"/>
+            <Setter Property="Foreground" Value="{StaticResource NexusTextPrimary}"/>
+            <Setter Property="Background" Value="Transparent"/>
+
+            <Style.Triggers>
+
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#663B82F6"/>
+                </Trigger>
+
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#993B82F6"/>
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                </Trigger>
+
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="DataGridCell">
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Foreground" Value="{StaticResource NexusTextPrimary}"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
     </Window.Resources>
 
+    <!-- ====================================================== -->
+    <!-- MAIN APPLICATION LAYOUT                                -->
+    <!-- ====================================================== -->
+
     <Grid>
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="252"/>
             <ColumnDefinition Width="*"/>
@@ -74,60 +806,73 @@
         </Grid.RowDefinitions>
 
         <!-- LEFT SIDEBAR -->
-        <Border Grid.Row="0" Grid.Column="0"
-                Background="{StaticResource SidebarBackground}"
-                BorderBrush="#253041"
+
+        <Border Grid.Row="0"
+                Grid.Column="0"
+                Background="{StaticResource GlassSidebarBrush}"
+                BorderBrush="#66526A83"
                 BorderThickness="0,0,1,0">
 
             <DockPanel Margin="18,20,18,16">
 
-                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,30">
-                    <Border Width="44" Height="44"
-                            HorizontalAlignment="Left"
-                            Background="#1D3557"
-                            CornerRadius="12">
-                        <TextBlock Text="N"
-                                   FontSize="26"
-                                   FontWeight="Bold"
-                                   Foreground="#93C5FD"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"/>
-                    </Border>
+                <!-- BRANDING -->
 
-                    <TextBlock Text="Nexus IT"
-                               FontSize="23"
-                               FontWeight="Bold"
-                               Margin="0,13,0,3"/>
+                <StackPanel DockPanel.Dock="Top"
+                            Margin="0,0,0,30">
+
+                    <Image Source="Assets/NexusIT-Wordmark.png"
+                           Width="216"
+                           Height="61"
+                           Stretch="Uniform"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"/>
 
                     <TextBlock Text="IT ADMINISTRATION"
                                FontSize="10"
                                FontWeight="SemiBold"
-                               Foreground="#6B7280"
-                               />
+                               Foreground="#8B9BB0"
+                               Margin="2,9,0,0"/>
+
                 </StackPanel>
 
-                <StackPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
-                    <Border Height="1" Background="#253041"
+                <!-- SETTINGS -->
+
+                <StackPanel DockPanel.Dock="Bottom"
+                            Margin="0,12,0,0">
+
+                    <Border Height="1"
+                            Background="{StaticResource NexusBorderSubtle}"
                             Margin="0,0,0,14"/>
 
                     <Button Style="{StaticResource NavigationButton}"
                             Tag="Settings"
                             Click="NavigationButton_Click">
+
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="⚙" Width="30"
+
+                            <TextBlock Text="⚙"
+                                       Width="30"
                                        FontSize="17"
                                        Foreground="#9CA3AF"/>
+
                             <TextBlock Text="Settings"
                                        VerticalAlignment="Center"/>
+
                         </StackPanel>
+
                     </Button>
+
                 </StackPanel>
+
+                <!-- WORKSPACE NAVIGATION -->
 
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
+
                     <StackPanel>
+
                         <TextBlock Text="WORKSPACE"
-                                   Foreground="#6B7280"
+                                   Foreground="#8B9BB0"
                                    FontSize="10"
                                    FontWeight="SemiBold"
                                    Margin="10,0,0,10"/>
@@ -136,151 +881,281 @@
                                 Style="{StaticResource NavigationButton}"
                                 Tag="Dashboard"
                                 Click="NavigationButton_Click">
+
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="▦" Width="30" FontSize="19"/>
+
+                                <TextBlock Text="▦"
+                                           Width="30"
+                                           FontSize="19"/>
+
                                 <TextBlock Text="Dashboard"
                                            VerticalAlignment="Center"/>
+
                             </StackPanel>
+
                         </Button>
 
                         <Button Style="{StaticResource NavigationButton}"
                                 Tag="Chromebooks"
                                 Click="NavigationButton_Click">
+
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="▣" Width="30" FontSize="17"/>
+
+                                <TextBlock Text="▣"
+                                           Width="30"
+                                           FontSize="17"/>
+
                                 <TextBlock Text="Chromebooks"
                                            VerticalAlignment="Center"/>
+
                             </StackPanel>
+
                         </Button>
 
                         <Button Style="{StaticResource NavigationButton}"
                                 Tag="Google Groups"
                                 Click="NavigationButton_Click">
+
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="♙" Width="30" FontSize="19"/>
+
+                                <TextBlock Text="♙"
+                                           Width="30"
+                                           FontSize="19"/>
+
                                 <TextBlock Text="Google Groups"
                                            VerticalAlignment="Center"/>
+
                             </StackPanel>
+
                         </Button>
 
                         <Button Style="{StaticResource NavigationButton}"
                                 Tag="Active Directory"
                                 Click="NavigationButton_Click">
+
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="⌘" Width="30" FontSize="18"/>
+
+                                <TextBlock Text="⌘"
+                                           Width="30"
+                                           FontSize="18"/>
+
                                 <TextBlock Text="Active Directory"
                                            VerticalAlignment="Center"/>
+
                             </StackPanel>
+
                         </Button>
 
                         <Button Style="{StaticResource NavigationButton}"
                                 Tag="MECM / SCCM"
                                 Click="NavigationButton_Click">
+
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="▤" Width="30" FontSize="18"/>
+
+                                <TextBlock Text="▤"
+                                           Width="30"
+                                           FontSize="18"/>
+
                                 <TextBlock Text="MECM / SCCM"
                                            VerticalAlignment="Center"/>
+
                             </StackPanel>
+
                         </Button>
 
                         <Button Style="{StaticResource NavigationButton}"
                                 Tag="RDP"
                                 Click="NavigationButton_Click">
+
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="▱" Width="30" FontSize="19"/>
+
+                                <TextBlock Text="▱"
+                                           Width="30"
+                                           FontSize="19"/>
+
                                 <TextBlock Text="RDP"
                                            VerticalAlignment="Center"/>
+
                             </StackPanel>
+
                         </Button>
 
                         <Button Style="{StaticResource NavigationButton}"
                                 Tag="Admin Tools"
                                 Click="NavigationButton_Click">
+
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="⚒" Width="30" FontSize="18"/>
+
+                                <TextBlock Text="⚒"
+                                           Width="30"
+                                           FontSize="18"/>
+
                                 <TextBlock Text="Admin Tools"
                                            VerticalAlignment="Center"/>
+
                             </StackPanel>
+
                         </Button>
+
                         <Button Style="{StaticResource NavigationButton}"
                                 Tag="Network &amp; System Tools"
-                                Click="NavigationButton_Click">         
+                                Click="NavigationButton_Click">
+
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="⌘" Width="30" FontSize="18"/>
+
+                                <TextBlock Text="⌘"
+                                           Width="30"
+                                           FontSize="18"/>
+
                                 <TextBlock Text="Network &amp; System Tools"
                                            VerticalAlignment="Center"/>
+
                             </StackPanel>
+
                         </Button>
+
+
+                        <Button Style="{StaticResource NavigationButton}"
+        Tag="Switch Diagnostics"
+        Click="NavigationButton_Click">
+
+                            <StackPanel Orientation="Horizontal">
+
+                                <TextBlock Text="⇄"
+                   Width="30"
+                   FontSize="19"
+                   Foreground="#67E8F9"/>
+
+                                <TextBlock Text="Switch Diagnostics"
+                   VerticalAlignment="Center"/>
+
+                            </StackPanel>
+
+                        </Button>
+
+
+                        <Button Style="{StaticResource NavigationButton}"
+                                Tag="Web Tools"
+                                Click="NavigationButton_Click">
+
+                            <StackPanel Orientation="Horizontal">
+
+                                <TextBlock Text="🌐"
+                                           Width="30"
+                                           FontSize="18"/>
+
+                                <TextBlock Text="Web Tools"
+                                           VerticalAlignment="Center"/>
+
+                            </StackPanel>
+
+                        </Button>
+
                     </StackPanel>
+
                 </ScrollViewer>
+
             </DockPanel>
+
         </Border>
 
         <!-- MAIN CONTENT -->
-        <Grid Grid.Row="0" Grid.Column="1">
+
+        <Grid Grid.Row="0"
+              Grid.Column="1"
+              Background="{StaticResource MainWindowGradient}">
+
             <Grid.RowDefinitions>
                 <RowDefinition Height="78"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
+            <!-- HEADER -->
+
             <Border Grid.Row="0"
-                    BorderBrush="#253041"
+                    Background="{StaticResource GlassHeaderBrush}"
+                    BorderBrush="{StaticResource NexusBorderSubtle}"
                     BorderThickness="0,0,0,1"
                     Padding="30,0">
 
                 <Grid>
+
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
                     <StackPanel VerticalAlignment="Center">
+
                         <TextBlock x:Name="CurrentPageTitle"
                                    Text="Dashboard"
                                    Style="{StaticResource PageTitle}"/>
+
                         <TextBlock x:Name="CurrentPageSubtitle"
                                    Text="Your central workspace for IT administration."
-                                   Foreground="{StaticResource SecondaryText}"
+                                   Foreground="{StaticResource NexusTextMuted}"
                                    FontSize="12"
                                    Margin="0,4,0,0"/>
+
                     </StackPanel>
 
+                    <!-- WORKSPACE STATUS -->
+
                     <Border Grid.Column="1"
-                            Background="#172B25"
-                            BorderBrush="#285342"
+                            Background="#663BDA8A"
+                            BorderBrush="#8061D99B"
                             BorderThickness="1"
-                            CornerRadius="16"
+                            CornerRadius="18"
                             Padding="12,7"
                             VerticalAlignment="Center">
+
                         <StackPanel Orientation="Horizontal">
-                            <Ellipse Width="7" Height="7"
-                                     Fill="#4ADE80"
+
+                            <Ellipse Width="7"
+                                     Height="7"
+                                     Fill="{StaticResource NexusSuccess}"
                                      Margin="0,0,8,0"
                                      VerticalAlignment="Center"/>
+
                             <TextBlock Text="Workspace ready"
                                        Foreground="#86EFAC"
                                        FontSize="12"
                                        VerticalAlignment="Center"/>
+
                         </StackPanel>
+
                     </Border>
+
                 </Grid>
+
             </Border>
 
+            <!-- PAGE CONTENT -->
+
             <ScrollViewer Grid.Row="1"
+                          Background="Transparent"
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
+
                 <ContentControl x:Name="MainContent"
-                                Margin="30,26,30,30"/>
+                                Margin="30,26,30,30"
+                                Background="Transparent"/>
+
             </ScrollViewer>
+
         </Grid>
 
         <!-- STATUS BAR -->
-        <Border Grid.Row="1" Grid.ColumnSpan="2"
-                Background="#0B1220"
-                BorderBrush="#253041"
+
+        <Border Grid.Row="1"
+                Grid.ColumnSpan="2"
+                Background="#F20B1220"
+                BorderBrush="{StaticResource NexusBorderSubtle}"
                 BorderThickness="0,1,0,0"
                 Padding="18,0">
+
             <Grid>
+
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
@@ -289,15 +1164,19 @@
                 <TextBlock x:Name="StatusText"
                            Text="Ready"
                            FontSize="11"
-                           Foreground="#9CA3AF"
+                           Foreground="{StaticResource NexusTextMuted}"
                            VerticalAlignment="Center"/>
 
                 <TextBlock Grid.Column="1"
                            Text="Nexus IT  •  Initial build"
                            FontSize="11"
-                           Foreground="#6B7280"
+                           Foreground="{StaticResource NexusTextDisabled}"
                            VerticalAlignment="Center"/>
+
             </Grid>
+
         </Border>
+
     </Grid>
+
 </Window>

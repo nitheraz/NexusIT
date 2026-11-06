@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
@@ -10,6 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 
 namespace NexusIT.App.Views;
 
@@ -90,11 +92,13 @@ public class ActiveDirectoryView : UserControl, IDisposable
         "NexusIT",
         "ad-connections.json");
 
-    private const string PanelColor = "#1F2937";
-    private const string InputColor = "#111827";
+    // Glass theme colours
+    private const string PanelColor = "#CC1A2B40";
+    private const string InputColor = "#99101828";
     private const string TextColor = "#E5E7EB";
-    private const string MutedColor = "#9CA3AF";
+    private const string MutedColor = "#A7B4C7";
     private const string AccentColor = "#3B82F6";
+    private const string BorderColor = "#665F7896";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -103,6 +107,7 @@ public class ActiveDirectoryView : UserControl, IDisposable
 
     public ActiveDirectoryView()
     {
+        Background = Brushes.Transparent;
         Content = BuildInterface();
 
         LoadConnections();
@@ -117,7 +122,11 @@ public class ActiveDirectoryView : UserControl, IDisposable
 
     private UIElement BuildInterface()
     {
-        var root = new Grid { Margin = new Thickness(20) };
+        var root = new Grid
+        {
+            Margin = new Thickness(20),
+            Background = Brushes.Transparent
+        };
 
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -172,9 +181,7 @@ public class ActiveDirectoryView : UserControl, IDisposable
         _profileCombo.MinWidth = 220;
         _profileCombo.Height = 36;
         _profileCombo.DisplayMemberPath = nameof(ConnectionProfile.Name);
-        _profileCombo.Background = BrushFrom(InputColor);
-        _profileCombo.Foreground = BrushFrom(TextColor);
-        _profileCombo.BorderBrush = BrushFrom("#374151");
+        StyleComboBox(_profileCombo);
         _profileCombo.SelectionChanged += ProfileCombo_SelectionChanged;
 
         profilePanel.Children.Add(_profileCombo);
@@ -187,9 +194,9 @@ public class ActiveDirectoryView : UserControl, IDisposable
         };
 
         AddProfileButton(profileButtons, _addProfileButton, "Add", AccentColor, AddProfile);
-        AddProfileButton(profileButtons, _updateProfileButton, "Update", "#374151", UpdateProfile);
-        AddProfileButton(profileButtons, _deleteProfileButton, "Delete", "#991B1B", DeleteProfile);
-        AddProfileButton(profileButtons, _defaultProfileButton, "Set Default", "#374151", SetDefaultProfile);
+        AddProfileButton(profileButtons, _updateProfileButton, "Update", "#663B506B", UpdateProfile);
+        AddProfileButton(profileButtons, _deleteProfileButton, "Delete", "#66991B1B", DeleteProfile);
+        AddProfileButton(profileButtons, _defaultProfileButton, "Set Default", "#663B506B", SetDefaultProfile);
 
         Grid.SetColumn(profileButtons, 1);
         profileRow.Children.Add(profileButtons);
@@ -230,7 +237,7 @@ public class ActiveDirectoryView : UserControl, IDisposable
         _connectButton.IsDefault = true;
         connectionButtons.Children.Add(_connectButton);
 
-        StyleButton(_disconnectButton, "Disconnect", "#374151");
+        StyleButton(_disconnectButton, "Disconnect", "#66991B1B");
         _disconnectButton.Margin = new Thickness(0, 6, 0, 0);
         _disconnectButton.Click += (_, _) => Disconnect();
         connectionButtons.Children.Add(_disconnectButton);
@@ -298,7 +305,7 @@ public class ActiveDirectoryView : UserControl, IDisposable
         Grid.SetColumn(_connectedDetails, 1);
         connectedGrid.Children.Add(_connectedDetails);
 
-        StyleButton(_connectedDisconnectButton, "Disconnect", "#991B1B");
+        StyleButton(_connectedDisconnectButton, "Disconnect", "#66991B1B");
         _connectedDisconnectButton.Click += (_, _) => Disconnect();
 
         Grid.SetColumn(_connectedDisconnectButton, 2);
@@ -310,7 +317,10 @@ public class ActiveDirectoryView : UserControl, IDisposable
         root.Children.Add(_connectedStatusPanel);
 
         // Management area
-        var managementGrid = new Grid();
+        var managementGrid = new Grid
+        {
+            Background = Brushes.Transparent
+        };
 
         managementGrid.ColumnDefinitions.Add(
             new ColumnDefinition { Width = new GridLength(1.25, GridUnitType.Star) });
@@ -347,6 +357,7 @@ public class ActiveDirectoryView : UserControl, IDisposable
         _modeCombo.Items.Add("Users");
         _modeCombo.Items.Add("Computers");
         _modeCombo.SelectedIndex = 0;
+        StyleComboBox(_modeCombo);
         _modeCombo.SelectionChanged += (_, _) => ChangeMode();
 
         Grid.SetColumn(_modeCombo, 1);
@@ -408,9 +419,7 @@ public class ActiveDirectoryView : UserControl, IDisposable
         _detailsBox.AcceptsReturn = true;
         _detailsBox.TextWrapping = TextWrapping.Wrap;
         _detailsBox.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
-        _detailsBox.Background = BrushFrom(InputColor);
-        _detailsBox.Foreground = BrushFrom(TextColor);
-        _detailsBox.BorderBrush = BrushFrom("#374151");
+        StyleInput(_detailsBox);
         _detailsBox.Padding = new Thickness(10);
         _detailsBox.FontSize = 13;
         _detailsBox.Height = 330;
@@ -425,7 +434,7 @@ public class ActiveDirectoryView : UserControl, IDisposable
 
         var groupButtons = new WrapPanel { Margin = new Thickness(0, 8, 0, 8) };
 
-        StyleButton(_refreshGroupsButton, "Refresh", "#374151");
+        StyleButton(_refreshGroupsButton, "Refresh", "#663B506B");
         _refreshGroupsButton.Margin = new Thickness(0, 0, 6, 0);
         _refreshGroupsButton.Click += (_, _) => LoadGroupMemberships();
 
@@ -433,7 +442,7 @@ public class ActiveDirectoryView : UserControl, IDisposable
         _addToGroupButton.Margin = new Thickness(0, 0, 6, 0);
         _addToGroupButton.Click += (_, _) => AddUserToGroup();
 
-        StyleButton(_removeFromGroupButton, "Remove", "#991B1B");
+        StyleButton(_removeFromGroupButton, "Remove", "#66991B1B");
         _removeFromGroupButton.Click += (_, _) => RemoveUserFromGroup();
 
         groupButtons.Children.Add(_refreshGroupsButton);
@@ -480,28 +489,28 @@ public class ActiveDirectoryView : UserControl, IDisposable
         var actionsContent = new StackPanel();
         actionsContent.Children.Add(CreateSectionTitle("Account actions"));
 
-        AddActionButton(actionsContent, _enableButton, "Enable user", "#166534",
+        AddActionButton(actionsContent, _enableButton, "Enable user", "#663B9B65",
             (_, _) => ChangeUserEnabled(true));
 
-        AddActionButton(actionsContent, _disableButton, "Disable user", "#991B1B",
+        AddActionButton(actionsContent, _disableButton, "Disable user", "#66991B1B",
             (_, _) => ChangeUserEnabled(false));
 
-        AddActionButton(actionsContent, _unlockButton, "Unlock user", "#374151",
+        AddActionButton(actionsContent, _unlockButton, "Unlock user", "#663B506B",
             (_, _) => UnlockSelectedUser());
 
         AddActionButton(actionsContent, _resetPasswordButton, "Reset password", AccentColor,
             (_, _) => ResetSelectedPassword());
 
-        AddActionButton(actionsContent, _enableComputerButton, "Enable computer", "#166534",
+        AddActionButton(actionsContent, _enableComputerButton, "Enable computer", "#663B9B65",
             (_, _) => ChangeComputerEnabled(true));
 
-        AddActionButton(actionsContent, _disableComputerButton, "Disable computer", "#991B1B",
+        AddActionButton(actionsContent, _disableComputerButton, "Disable computer", "#66991B1B",
             (_, _) => ChangeComputerEnabled(false));
 
-        AddActionButton(actionsContent, _deleteComputerButton, "Delete computer", "#7F1D1D",
+        AddActionButton(actionsContent, _deleteComputerButton, "Delete computer", "#667F1D1D",
             (_, _) => DeleteSelectedComputer());
 
-        AddActionButton(actionsContent, _moveOuButton, "Move to OU", "#374151",
+        AddActionButton(actionsContent, _moveOuButton, "Move to OU", "#663B506B",
             (_, _) => MoveSelectedObject());
 
         actionsContent.Children.Add(new TextBlock
@@ -2064,10 +2073,53 @@ public class ActiveDirectoryView : UserControl, IDisposable
 
     private static Border CreatePanel() => new()
     {
-        Background = BrushFrom(PanelColor),
-        CornerRadius = new CornerRadius(8),
-        Padding = new Thickness(16)
+        Background = CreateGlassBrush(),
+        BorderBrush = BrushFrom(BorderColor),
+        BorderThickness = new Thickness(1),
+        CornerRadius = new CornerRadius(14),
+        Padding = new Thickness(16),
+        Effect = CreatePanelShadow()
     };
+
+    private static LinearGradientBrush CreateGlassBrush()
+    {
+        return new LinearGradientBrush
+        {
+            StartPoint = new Point(0, 0),
+            EndPoint = new Point(1, 1),
+            GradientStops =
+            {
+                new GradientStop(Color.FromArgb(225, 38, 59, 85), 0),
+                new GradientStop(Color.FromArgb(205, 29, 46, 68), 0.55),
+                new GradientStop(Color.FromArgb(190, 22, 35, 54), 1)
+            }
+        };
+    }
+
+    private static LinearGradientBrush CreateDialogGlassBrush()
+    {
+        return new LinearGradientBrush
+        {
+            StartPoint = new Point(0, 0),
+            EndPoint = new Point(1, 1),
+            GradientStops =
+            {
+                new GradientStop(Color.FromRgb(23, 39, 60), 0),
+                new GradientStop(Color.FromRgb(17, 29, 46), 1)
+            }
+        };
+    }
+
+    private static DropShadowEffect CreatePanelShadow()
+    {
+        return new DropShadowEffect
+        {
+            Color = Colors.Black,
+            BlurRadius = 18,
+            ShadowDepth = 3,
+            Opacity = 0.22
+        };
+    }
 
     private static TextBlock CreateLabel(string text) => new()
     {
@@ -2089,24 +2141,48 @@ public class ActiveDirectoryView : UserControl, IDisposable
     {
         control.Background = BrushFrom(InputColor);
         control.Foreground = BrushFrom(TextColor);
-        control.BorderBrush = BrushFrom("#374151");
+        control.BorderBrush = BrushFrom("#665F7896");
         control.BorderThickness = new Thickness(1);
         control.Padding = new Thickness(9, 7, 9, 7);
         control.FontSize = 13;
     }
 
+    private static void StyleComboBox(ComboBox comboBox)
+    {
+        comboBox.Background = BrushFrom(InputColor);
+        comboBox.Foreground = BrushFrom(TextColor);
+        comboBox.BorderBrush = BrushFrom("#665F7896");
+        comboBox.BorderThickness = new Thickness(1);
+        comboBox.Padding = new Thickness(7, 4, 7, 4);
+    }
+
+
+
     private static void StyleButton(Button button, string text, string background)
     {
         button.Content = text;
 
-        if (Application.Current.TryFindResource(typeof(Button)) is Style style)
+        string styleKey = background.ToUpperInvariant() switch
+        {
+            "#3B82F6" => "PrimaryButton",
+
+            "#66991B1B" or
+            "#667F1D1D" => "DangerButton",
+
+            "#663B9B65" => "SuccessButton",
+
+            "#66FBBF24" or
+            "#66A68A49" => "WarningButton",
+
+            _ => "SecondaryButton"
+        };
+
+        // MainWindow owns the named button styles.
+        if (Application.Current.MainWindow?.TryFindResource(styleKey) is Style style)
+        {
             button.Style = style;
-
-        button.Background = BrushFrom(background);
-        button.BorderBrush = BrushFrom(background);
-        button.Foreground = Brushes.White;
+        }
     }
-
     private static void AddActionButton(
         Panel parent, Button button, string text,
         string color, RoutedEventHandler handler)
@@ -2131,9 +2207,9 @@ public class ActiveDirectoryView : UserControl, IDisposable
         {
             Setters =
             {
-                new Setter(Control.BackgroundProperty, BrushFrom("#0B1220")),
+                new Setter(Control.BackgroundProperty, BrushFrom("#CC142238")),
                 new Setter(Control.ForegroundProperty, Brushes.White),
-                new Setter(Control.BorderBrushProperty, BrushFrom("#374151")),
+                new Setter(Control.BorderBrushProperty, BrushFrom("#554F6682")),
                 new Setter(Control.BorderThicknessProperty, new Thickness(0, 0, 1, 1)),
                 new Setter(Control.PaddingProperty, new Thickness(10, 9, 10, 9)),
                 new Setter(Control.FontWeightProperty, FontWeights.SemiBold),
@@ -2141,11 +2217,19 @@ public class ActiveDirectoryView : UserControl, IDisposable
             }
         };
 
-        grid.Background = BrushFrom(InputColor);
+        grid.Background = BrushFrom("#66101828");
         grid.Foreground = BrushFrom(TextColor);
-        grid.BorderBrush = BrushFrom("#374151");
-        grid.RowBackground = BrushFrom(InputColor);
-        grid.AlternatingRowBackground = BrushFrom("#182334");
+        grid.BorderBrush = BrushFrom("#665F7896");
+        grid.RowBackground = BrushFrom("#55101828");
+        grid.AlternatingRowBackground = BrushFrom("#442C405B");
+        grid.HorizontalGridLinesBrush = BrushFrom("#334F6682");
+        grid.VerticalGridLinesBrush = BrushFrom("#224F6682");
+    }
+
+    private static void StyleDialogWindow(Window window)
+    {
+        window.Background = CreateDialogGlassBrush();
+        window.Foreground = Brushes.White;
     }
 
     private static void ShowOperationError(string message, Exception ex)
@@ -2237,6 +2321,7 @@ public class ActiveDirectoryView : UserControl, IDisposable
         public string Scope { get; set; } = string.Empty;
         public string DistinguishedName { get; set; } = string.Empty;
     }
+
     // =========================================================
     // GROUP SELECTION DIALOG
     // =========================================================
@@ -2258,10 +2343,13 @@ public class ActiveDirectoryView : UserControl, IDisposable
             Width = 720;
             Height = 570;
             WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            Background = BrushFrom("#111827");
-            Foreground = Brushes.White;
+            StyleDialogWindow(this);
 
-            var root = new Grid { Margin = new Thickness(20) };
+            var root = new Grid
+            {
+                Margin = new Thickness(20),
+                Background = Brushes.Transparent
+            };
 
             root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -2340,7 +2428,7 @@ public class ActiveDirectoryView : UserControl, IDisposable
             };
 
             var cancel = new Button();
-            StyleButton(cancel, "Cancel", "#374151");
+            StyleButton(cancel, "Cancel", "#663B506B");
             cancel.Margin = new Thickness(0, 0, 8, 0);
             cancel.Click += (_, _) => DialogResult = false;
 
@@ -2457,10 +2545,13 @@ public class ActiveDirectoryView : UserControl, IDisposable
             Height = 215;
             WindowStartupLocation = WindowStartupLocation.CenterOwner;
             ResizeMode = ResizeMode.NoResize;
-            Background = BrushFrom("#111827");
-            Foreground = Brushes.White;
+            StyleDialogWindow(this);
 
-            var root = new StackPanel { Margin = new Thickness(22) };
+            var root = new StackPanel
+            {
+                Margin = new Thickness(22),
+                Background = Brushes.Transparent
+            };
 
             root.Children.Add(new TextBlock
             {
@@ -2483,7 +2574,7 @@ public class ActiveDirectoryView : UserControl, IDisposable
             };
 
             var cancel = new Button();
-            StyleButton(cancel, "Cancel", "#374151");
+            StyleButton(cancel, "Cancel", "#663B506B");
             cancel.Margin = new Thickness(0, 0, 8, 0);
             cancel.Click += (_, _) => DialogResult = false;
 
@@ -2532,10 +2623,13 @@ public class ActiveDirectoryView : UserControl, IDisposable
             Height = 310;
             WindowStartupLocation = WindowStartupLocation.CenterOwner;
             ResizeMode = ResizeMode.NoResize;
-            Background = BrushFrom("#111827");
-            Foreground = Brushes.White;
+            StyleDialogWindow(this);
 
-            var root = new StackPanel { Margin = new Thickness(22) };
+            var root = new StackPanel
+            {
+                Margin = new Thickness(22),
+                Background = Brushes.Transparent
+            };
 
             root.Children.Add(new TextBlock
             {
@@ -2565,7 +2659,7 @@ public class ActiveDirectoryView : UserControl, IDisposable
             };
 
             var cancel = new Button();
-            StyleButton(cancel, "Cancel", "#374151");
+            StyleButton(cancel, "Cancel", "#663B506B");
             cancel.Margin = new Thickness(0, 0, 8, 0);
             cancel.Click += (_, _) => DialogResult = false;
 
@@ -2640,10 +2734,13 @@ public class ActiveDirectoryView : UserControl, IDisposable
             Width = 800;
             Height = 620;
             WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            Background = BrushFrom("#111827");
-            Foreground = Brushes.White;
+            StyleDialogWindow(this);
 
-            var root = new Grid { Margin = new Thickness(20) };
+            var root = new Grid
+            {
+                Margin = new Thickness(20),
+                Background = Brushes.Transparent
+            };
 
             root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -2671,7 +2768,7 @@ public class ActiveDirectoryView : UserControl, IDisposable
             searchRow.Children.Add(_searchBox);
 
             var refreshButton = new Button();
-            StyleButton(refreshButton, "Refresh", "#374151");
+            StyleButton(refreshButton, "Refresh", "#663B506B");
             refreshButton.Margin = new Thickness(8, 0, 0, 0);
             refreshButton.Click += (_, _) => SearchOus();
 
@@ -2724,7 +2821,7 @@ public class ActiveDirectoryView : UserControl, IDisposable
             };
 
             var cancel = new Button();
-            StyleButton(cancel, "Cancel", "#374151");
+            StyleButton(cancel, "Cancel", "#663B506B");
             cancel.Margin = new Thickness(0, 0, 8, 0);
             cancel.Click += (_, _) => DialogResult = false;
 

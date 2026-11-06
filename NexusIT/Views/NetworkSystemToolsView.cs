@@ -16,14 +16,8 @@ namespace NexusIT.App.Views
 {
     public class NetworkSystemToolsView : UserControl
     {
-        private readonly Brush BackgroundBrush =
-            new SolidColorBrush(Color.FromRgb(17, 24, 39));
-
         private readonly Brush PanelBrush =
-            new SolidColorBrush(Color.FromRgb(31, 41, 55));
-
-        private readonly Brush AccentBrush =
-            new SolidColorBrush(Color.FromRgb(59, 130, 246));
+            new SolidColorBrush(Color.FromRgb(27, 41, 64));
 
         private readonly Brush TextBrush =
             new SolidColorBrush(Color.FromRgb(243, 244, 246));
@@ -49,11 +43,10 @@ namespace NexusIT.App.Views
 
         private void BuildInterface()
         {
-            Background = BackgroundBrush;
-
             var root = new Grid
             {
-                Margin = new Thickness(24)
+                Margin = new Thickness(24),
+                Background = Brushes.Transparent
             };
 
             // MAIN TWO-COLUMN LAYOUT
@@ -442,8 +435,11 @@ namespace NexusIT.App.Views
             return new Border
             {
                 Background = PanelBrush,
-                CornerRadius = new CornerRadius(10),
-                Padding = new Thickness(16),
+                BorderBrush = new SolidColorBrush(
+                    Color.FromRgb(52, 68, 92)),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(12),
+                Padding = new Thickness(18),
                 Margin = new Thickness(0, 0, 12, 12),
                 Child = content
             };
@@ -487,8 +483,11 @@ namespace NexusIT.App.Views
             return new Border
             {
                 Background = PanelBrush,
-                CornerRadius = new CornerRadius(10),
-                Padding = new Thickness(16),
+                BorderBrush = new SolidColorBrush(
+                    Color.FromRgb(52, 68, 92)),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(12),
+                Padding = new Thickness(18),
                 Child = layout
             };
         }
@@ -528,15 +527,21 @@ namespace NexusIT.App.Views
             var button = new Button
             {
                 Content = text,
-                Height = 34,
+                Height = 36,
                 MinWidth = 100,
-                Padding = new Thickness(12, 5, 12, 5),
+                Padding = new Thickness(14, 7, 14, 7),
                 Margin = new Thickness(0, 0, 8, 8),
-                Background = AccentBrush,
-                Foreground = Brushes.White,
-                BorderThickness = new Thickness(0),
                 Cursor = System.Windows.Input.Cursors.Hand
             };
+
+            // Use the shared glass button style defined in MainWindow.xaml.
+            // Resolve it from the main window because this view is created
+            // dynamically and may not yet be attached to the visual tree.
+            if (Application.Current.MainWindow?.TryFindResource("PrimaryButton")
+                is Style primaryButtonStyle)
+            {
+                button.Style = primaryButtonStyle;
+            }
 
             button.Click += (_, _) =>
             {

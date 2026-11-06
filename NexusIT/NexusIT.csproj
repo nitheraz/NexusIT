@@ -7,6 +7,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+
+    <ApplicationIcon>Assets\NexusIT.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,9 +16,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\NexusIT.ico" />
+    <Resource Include="Assets\NexusIT-Wordmark.png" />
+    <Resource Include="Assets\NexusIT-AppIcon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="SharpVectors.Wpf" Version="1.8.6" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="10.0.0" />
     <PackageReference Include="System.Management" Version="10.0.14" />
+    <PackageReference Include="SSH.NET" Version="2026.0.0" />
   </ItemGroup>
 
   <ItemGroup>
