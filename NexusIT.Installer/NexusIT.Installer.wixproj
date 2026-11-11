@@ -1,0 +1,15 @@
+<Project Sdk="WixToolset.Sdk/7.0.1">
+
+  <PropertyGroup>
+    <InstallerPlatform>x64</InstallerPlatform>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DefineConstants>Debug</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="7.0.1" />
+  </ItemGroup>
+
+</Project>
